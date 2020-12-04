@@ -47,6 +47,7 @@ class IndexController extends BaseController
                 unset($_SESSION['logueado']);
                 unset($_SESSION['rol']);
                 unset($_SESSION['id']);
+                unset($_SESSION['hora']);
 
                 if (isset($_COOKIE['mantener'])) {
                     unset($_COOKIE['mantener']);
@@ -83,6 +84,7 @@ class IndexController extends BaseController
                     $_SESSION['logueado'] = $_POST['usuario'];
                     $_SESSION['rol'] = $resultModelo['datos']['rol_id'];
                     $_SESSION['id'] = $resultModelo['datos']['usuario_id'];
+                    $_SESSION['hora'] = date("H:i:s");
 
                     if (isset($_POST['recordar']) && ($_POST['recordar'] == "on")) {
                         setcookie('usuario', $_POST['usuario'], time() + (15 * 24 * 60 * 60));

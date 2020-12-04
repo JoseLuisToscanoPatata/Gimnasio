@@ -18,8 +18,8 @@ CREATE  OR REPLACE TABLE actividad (
 CREATE OR REPLACE TABLE tramo (
    tramo_id int(11) NOT NULL AUTO_INCREMENT,
    dia varchar(9) NOT NULL,
-   hora_inicio date NOT NULL,
-   hora_fin date NOT NULL,
+   hora_inicio time NOT NULL,
+   hora_fin time NOT NULL,
    actividad_id int(11) NOT NULL,
    fecha_alta date NOT NULL,
    fecha_baja date DEFAULT NULL,
@@ -70,6 +70,18 @@ CREATE OR REPLACE TABLE tramo_usuario (
   FOREIGN KEY(tramo_id) REFERENCES tramo(tramo_id),
   FOREIGN KEY(usuario_id) REFERENCES usuario(usuario_id)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ CREATE OR REPLACE TABLE mensaje (
+   mensaje_id int(11) NOT NULL AUTO_INCREMENT,
+   usu_origen int(11) NOT NULL,
+   usu_destino int(11) NOT NULL,
+   mensaje varchar(100) NOT NULL,
+   PRIMARY KEY(mensaje_id),
+   FOREIGN KEY(usu_origen) REFERENCES usuario(usuario_id),
+   FOREIGN KEY(usu_destino) REFERENCES usuario(usuario_id)
+ )
+
+ INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje) VALUES (NULL, 1, 2, '!Bienvenido a nuestro gimnasio!');
 
 COMMIT;
 

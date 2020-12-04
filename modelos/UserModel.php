@@ -169,7 +169,7 @@ class UserModel extends BaseModel
             //Inicializamos la transacción
             $this->db->beginTransaction();
             //Definimos la instrucción SQL parametrizada
-            $sql = "INSERT INTO usuario(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, DIRECCION, rol_id)
+            $sql = "INSERT INTO usuario(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
                          VALUES (:nif, :nombre, :apellido1, :apellido2, :imagen, :login, :password,:email , :telefono, :direccion, :rol_id)";
             // Preparamos la consulta...
             $query = $this->db->prepare($sql);
@@ -213,7 +213,7 @@ class UserModel extends BaseModel
             $this->db->beginTransaction();
             //Definimos la instrucción SQL parametrizada
             $sql = "UPDATE usuario SET usu_nombre= :nombre, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
-         DIRECCION = :direccion, rol_id = :rol_id WHERE usuario_id=:id";
+         direccion = :direccion, rol_id = :rol_id WHERE usuario_id=:id";
             $query = $this->db->prepare($sql);
             $query->execute([
                 'id' => $datos["id"],

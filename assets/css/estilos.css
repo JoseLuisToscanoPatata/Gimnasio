@@ -1,0 +1,240 @@
+@charset "UTF-8";
+
+
+/**CSS para el encabezado y el cuepro de las páginas*/
+
+.encabezado {
+  background-color: #33312f;
+  padding: 0.5rem;
+  transition: all .3s ease;
+}
+
+.encabezado .container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-around; 
+}
+
+#nombreGim, #nombreGim2 {
+   position: relative;
+   left: 35%;
+   font-weight: bold;
+   font-size: 1.3rem;
+}
+
+#nombreGim2 {
+   left: 5%;
+}
+
+#Saludo {
+   position: relative;
+   left: 2%;
+}
+
+
+#logo img {
+  width: 60px;
+  height: auto;
+}
+
+#logoSalir img {
+  width: 40px;
+  height: auto;
+  position: relative;
+  left: 100%;
+}
+
+.encabezado.Animado {
+  background-color: white;
+  padding: 1rem 0;   
+}
+
+.cuerpo {
+  background: url("../images/fondo2.png") no-repeat center top;
+  color: #fff;
+  background-size: cover;
+  background-attachment: fixed !important;
+  height: 89vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/**CSS para estilizar los enlaces de la barra de navegacion*/
+
+#enlaces {
+    height: auto !important;
+    display: block;
+    flex: 0 1 auto;
+    margin-left: auto; 
+   }
+
+#enlaces ul {
+    list-style: none;
+    display: flex;
+    margin: 0 0 0 0; 
+   }
+
+#enlaces ul li a {
+   text-decoration: none;
+    padding: .8rem;
+    text-transform: uppercase;
+    margin: 0 .35rem;
+    border-top: 0px;
+    border-bottom: 4px solid transparent;
+    transition: all 0.5s ease; 
+   }
+
+#enlaces ul li a:hover {
+    color: white;
+    border-bottom: 4px solid; 
+   }
+
+#enlace1 a {
+  color: #31c6f7;
+}
+
+#enlace2 a {
+  color: #cd38e0;
+}
+
+#enlace3 a {
+  color: #99ed2f;
+}
+
+#enlace4 a {
+  color: #fa8a0a;
+}
+
+.bajar {
+   margin-top: 6rem;
+}
+
+/**CSS para la página principal*/
+
+#btReg, #btLog {
+  border-radius: 30px;
+  border: 0;
+  height: 100px;
+  width: 300px;
+  margin: 0.4rem;
+  font-size: 2rem;
+  background-color: #33312f;
+  color: white;
+ }
+
+/**CSS para los botones de las páginas*/
+
+ #btReg:hover , #btLog:hover, #btEntrar:hover, #btRegistro:hover {
+   transition: all 0.5s ease; 
+   background-color: white;
+   color: #33312f;
+ }
+
+/**CSS para la ventana de login*/
+
+#btEntrar {
+  border-radius: 20px;
+  border: 0;
+  height: 50px;
+  width: 120px;
+  margin: 0.4rem;
+  font-size: 2rem;
+  background-color: #33312f;
+  color: white;
+ }
+
+#cuerpoLogin  h1, #cuerpoRegistro h1, #cuerpoUsuarios {
+   margin: 0 0 2rem 0;
+}
+ #cuerpoLogin  h1, #formLogin div label, #formLogin label{
+    color: #33312f;
+ }
+
+ #formLogin .form-group {
+    margin-left:15rem;
+ }
+
+ #formLogin .casilla {
+    margin-left: 25rem;
+ }
+
+ #campoMensajes {
+    margin: 3rem 0 5rem 0;
+ }
+
+/**CSS para la página de registro, actualización y adición de usuarios*/
+
+#btRegistro {
+  border-radius: 20px;
+  border: 0;
+  height: 50px;
+  width: 170px;
+  margin: 0.4rem;
+  font-size: 2rem;
+  background-color: #33312f;
+  color: white;
+ }
+
+#cuerpoRegistro  h1, #formRegistro div div label, #formRegistro div label, #formRegistro label{
+    color: #33312f;
+    font-weight: bold;
+ }
+
+ #formRegistro div div label, #formRegistro div label, #formRegistro label{
+    font-size: 1.2rem;
+ }
+
+
+/**CSS para el pie de página*/
+
+footer {
+  background-color: #33312f;
+  transition: all .3s ease;
+  padding-top: 45px;
+}
+
+#pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+
+#pie  span {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 1rem;
+}
+
+#pie ul {
+   position: relative;
+   right: 10%;
+  display: flex;
+  text-decoration: none;
+  list-style: none;
+  flex-direction: inherit;
+  justify-content: center;
+}
+
+#pie ul li {
+  flex: 0 0 100px;
+}
+
+#pie ul li a {
+  font-size: 3rem;
+}
+
+#facebook {
+  color: #3b5998;
+}
+
+#instagram {
+  color: white;
+}
+
+#logo2 img {
+  width: 50px;
+  height: auto;
+}

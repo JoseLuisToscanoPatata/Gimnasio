@@ -198,6 +198,7 @@ class UserController extends BaseController
                 "imagen" => isset($imagen) ? $imagen : "",
                 "txttelefono" => isset($telefono) ? $telefono : "",
                 "txtdireccion" => isset($direccion) ? $direccion : "",
+                "rol_id" => isset($rol_id) ? $rol_id : 2,
             ],
             "mensajes" => $this->mensajes,
         ];
@@ -224,6 +225,7 @@ class UserController extends BaseController
         $valdireccion = "";
         $valimagen = "";
         $valrol_id = "";
+        $valpass = "";
 
         // Si se ha pulsado el botón actualizar...
         if (isset($_POST['submit'])) { //Realizamos la actualización con los datos existentes en los campos
@@ -238,7 +240,7 @@ class UserController extends BaseController
             $nuevotelefono = $_POST['txttelefono'];
             $nuevodireccion = $_POST['txtdireccion'];
             $nuevaimagen = "";
-            $nuevapassword = sha1($_POST['txtpassword']);
+            $nuevapassword = $_POST['txtpass'];
 
             // Definimos la variable $imagen que almacenará el nombre de imagen
             // que almacenará la Base de Datos inicializada a NULL
@@ -287,7 +289,7 @@ class UserController extends BaseController
                     'direccion' => $nuevodireccion,
                     'imagen' => $nuevaimagen,
                     'rol_id' => $nuevorol_id,
-                    'password' => $nuevapassword,
+                    'password' => sha1($nuevapassword),
                 ]);
                 //Analizamos cómo finalizó la operación de registro y generamos un mensaje
                 //indicativo del estado correspondiente
@@ -320,6 +322,7 @@ class UserController extends BaseController
             $valtelefono = $nuevotelefono;
             $valdireccion = $nuevodireccion;
             $valrol_id = $nuevorol_id;
+            $valpass = $nuevapassword;
 
         } else { //Estamos rellenando los campos con los valores recibidos del listado
             if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
@@ -341,8 +344,9 @@ class UserController extends BaseController
                     $valemail = $resultModelo["datos"]["email"];
                     $valimagen = $resultModelo["datos"]["imagen"];
                     $valtelefono = $resultModelo["datos"]["telefono"];
-                    $valdireccion = $resultModelo["datos"]["DIRECCION"];
+                    $valdireccion = $resultModelo["datos"]["direccion"];
                     $valrol_id = $resultModelo["datos"]["rol_id"];
+                    $valpass = "";
 
                 else:
                     $this->mensajes[] = [
@@ -368,6 +372,7 @@ class UserController extends BaseController
                 "txtdireccion" => $valdireccion,
                 "imagen" => $valimagen,
                 "rol_id" => $valrol_id,
+                "txtpass" => $valpass,
             ],
             "mensajes" => $this->mensajes,
             "id" => $id,

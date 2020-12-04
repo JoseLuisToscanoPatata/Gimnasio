@@ -3,64 +3,112 @@
 <!--TODO Cambiar formato-->
 
 <html>
-  <head>
-    <?php require_once 'includes/head.php';?>
-  </head>
-  <body class="cuerpo">
-    <div class="container centrar">
-      <div class="container cuerpo text-center">
-        <p><h1>GIMNASIO PELOTITA</h1> </p>
+
+<head>
+   <?php require_once 'includes/head.php';?>
+</head>
+
+<body>
+
+   <section class="cuerpo">
+      <?php require_once 'includes/cabeceraOut.php';?>
+
+      <div class="text-xs-center bajar" id="cuerpoRegistro">
+         <div class="container">
+
+            <h1 class="display-5 wow bounce font-weight-bold">REGISTRO</h2>
+
+               <form action="?controller=index&accion=register" method="post" enctype="multipart/form-data"
+                  id="formRegistro">
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="NIF">NIF: </label>
+                        <input type="text" class="form-control" id="NIF" name="txtnif" placeholder="Inserte su NIF"
+                           value="<?=$datos["txtnif"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="nombre">Nombre: </label>
+                        <input type="text" class="form-control" name="txtnombre" placeholder="Inserte su nombre"
+                           value="<?=$datos["txtnombre"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="Apellido1">Primer apellido: </label>
+                        <input type="text" class="form-control" id="apellido1" name="txtapellido1"
+                           placeholder="Primer apellido.." value="<?=$datos["txtapellido1"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="apellido2">Segundo apellido: </label>
+                        <input type="text" class="form-control" id="apellido2" name="txtapellido2"
+                           placeholder="Segundo apellido.." value="<?=$datos["txtapellido2"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="usuario">Usuario: </label>
+                        <input type="text" class="form-control" id="usuario" name="txtlogin"
+                           placeholder="Inserte su nombre de usuario" value="<?=$datos["txtlogin"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="password">Contraseña: </label>
+                        <input type="password" class="form-control" id="password" name="txtpass"
+                           placeholder="Inserte su contraseña" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="email">Email: </label>
+                        <input type="email" class="form-control" id="email" name="txtemail"
+                           placeholder="Inserte su correo" value="<?=$datos["txtemail"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="direccion">Direccion: </label>
+                        <input type="text" class="form-control" id="direccion" name="txtdireccion"
+                           placeholder="Inserte su dirección" value="<?=$datos["txtdireccion"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="telefono">Telefono móvil: </label>
+                        <input type="text" class="form-control" id="telefono" name="txttelefono"
+                           placeholder="Inserte su teléfono movil" value="<?=$datos["txttelefono"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="imagen">Imagen: </label>
+                        <input type="file" class="form-control" id="imagen" name="imagen"
+                           placeholder="Inserte su imagen de perfil" value="<?=$datos["imagen"]?>" required>
+                     </div>
+                  </div>
+
+                  <input type="submit" value="Registrar" name="submit" id="btRegistro">
+
+               </form>
+
+               <div id="campoMensajes">
+                  <?php if (isset($mensajes)) {
+    foreach ($mensajes as $mensaje) {?>
+                  <div class="alert alert-<?=$mensaje["tipo"]?>"><?=$mensaje["mensaje"]?></div>
+                  <?php }}?>
+               </div>
+
+         </div>
       </div>
 
-     <a href="?controller=index&accion=index"> Volver</a>
+   </section>
 
-      <h2>REGISTRO</h2>
+   <?php require_once 'includes/Footer.php';?>
+   <?php require_once 'includes/cargaJs.php';?>
+</body>
 
-       <?php if (isset($mensajes)) {
-    foreach ($mensajes as $mensaje) {?>
-                <div class="alert alert-<?=$mensaje["tipo"]?>"><?=$mensaje["mensaje"]?></div>
-         <?php }}?>
-
-       <form action="?controller=index&accion=register" method="post" enctype="multipart/form-data">
-            <label for="txtnif">NIF
-               <input type="text" class="form-control" name="txtnif" required value="<?=$datos["txtnif"]?>" required></label>
-            <br />
-
-            <label for="txtnombre">Nombre
-               <input type="text" class="form-control" name="txtnombre" required value="<?=$datos["txtnombre"]?>" required></label>
-            <br />
-
-            <label for="txtapellido1">Primer apellido
-               <input type="text" class="form-control" name="txtapellido1" required value="<?=$datos["txtapellido1"]?>" required></label>
-            <br />
-
-            <label for="txtapellido2">Segundo apellido
-               <input type="text" class="form-control" name="txtapellido2" required value="<?=$datos["txtapellido2"]?>" required></label>
-            <br />
-
-            <label for="txtlogin">Nombre de usuario
-               <input type="text" class="form-control" name="txtlogin" required value="<?=$datos["txtlogin"]?>" required></label>
-            <br />
-
-            <label for="txtemail">Email
-               <input type="email" class="form-control" name="txtemail" value="<?=$datos["txtemail"]?>" required></label>
-            <br />
-
-            <label for="txtpass">Contraseña
-               <input type="password" class="form-control" name="txtpass" required value="<?=$datos["txtpass"]?>" required></label>
-            <br />
-
-            <label for="txttelefono">Telefono móvil
-               <input type="text" class="form-control" name="txttelefono" required value="<?=$datos["txttelefono"]?>" required></label>
-            <br />
-
-            <label for="txtdireccion">Direccion
-               <input type="text" class="form-control" name="txtdireccion" required value="<?=$datos["txtdireccion"]?>" required></label>
-            <br />
-            <label for="imagen">Imagen <input type="file" name="imagen" class="form-control" value="<?=$datos["imagen"]?>" /></label>
-            </br>
-            <input type="submit" value="Registrar" name="submit" class="btn btn-success">
-         </form>
-    </div>
-  </body>
 </html>

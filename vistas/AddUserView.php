@@ -10,69 +10,136 @@
    <?php require_once 'includes/head.php';?>
 </head>
 
-<body class="cuerpo">
-   <div class="centrar">
-      <div class="container centrar">
-         <a href="?controller=home&accion=index">Inicio</a>
-         <div class="container cuerpo text-center centrar">
-            <p>
-               <h2><img class="alineadoTextoImagen" src="assets/images/user.png" width="50px" />Añadir Usuario</h2>
-            </p>
+<body>
+
+   <section class="cuerpo">
+      <?php if($_SESSION['rol'] == 1) {
+          require_once 'includes/cabeceraAdmin.php';
+      } else {
+           require_once 'includes/cabeceraSocio.php';
+      } ?>
+
+      <div class="text-xs-center bajar" id="cuerpoRegistro">
+         <div class="container">
+
+            <h1 class="display-5 wow bounce font-weight-bold">AÑADIR USUARIO</h2>
+
+               <form action="?controller=user&accion=actuser" method="post" enctype="multipart/form-data"
+                  id="formRegistro">
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="NIF">NIF: </label>
+                        <input type="text" class="form-control" id="NIF" name="txtnif" placeholder="Inserte su NIF"
+                           value="<?=$datos["txtnif"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="nombre">Nombre: </label>
+                        <input type="text" class="form-control" name="txtnombre" placeholder="Inserte su nombre"
+                           value="<?=$datos["txtnombre"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="Apellido1">Primer apellido: </label>
+                        <input type="text" class="form-control" id="apellido1" name="txtapellido1"
+                           placeholder="Primer apellido.." value="<?=$datos["txtapellido1"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="apellido2">Segundo apellido: </label>
+                        <input type="text" class="form-control" id="apellido2" name="txtapellido2"
+                           placeholder="Segundo apellido.." value="<?=$datos["txtapellido2"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="usuario">Usuario: </label>
+                        <input type="text" class="form-control" id="usuario" name="txtlogin"
+                           placeholder="Inserte su nombre de usuario" value="<?=$datos["txtlogin"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="password">Contraseña: </label>
+                        <input type="password" class="form-control" id="password" name="txtpass"
+                           placeholder="Inserte su contraseña" value="<?=$datos["txtpass"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-6">
+                        <label for="email">Email: </label>
+                        <input type="email" class="form-control" id="email" name="txtemail"
+                           placeholder="Inserte su correo" value="<?=$datos["txtemail"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-6">
+                        <label for="direccion">Direccion: </label>
+                        <input type="text" class="form-control" id="direccion" name="txtdireccion"
+                           placeholder="Inserte su dirección" value="<?=$datos["txtdireccion"]?>" required>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-3">
+                        <label for="telefono">Telefono móvil: </label>
+                        <input type="text" class="form-control" id="telefono" name="txttelefono"
+                           placeholder="Inserte su teléfono movil" value="<?=$datos["txttelefono"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-4">
+
+                        <label for="imagen">Imagen: </label>
+                        <input type="file" class="form-control" id="imagen" name="imagen"
+                           placeholder="Inserte su imagen de perfil" value="<?=$datos["imagen"]?>" required>
+                     </div>
+
+                     <div class="form-group col-md-2">
+                        <?php if ($datos["imagen"] != null && $datos["imagen"] != "") {?>
+                        <img src="assets/fotos/<?=$datos["imagen"]?>" width="60" /></br>
+                        <?php }?>
+                     </div>
+
+                     <div class="form-group col-md-3">
+
+                        <div class="radio-inline">
+                           <label><input type="radio" name="rol_id" value="2"
+                                 <?php if ($datos["rol_id"] == 2) {echo "checked";} ?>>Socio</label>
+                        </div>
+
+                        <div class="radio-inline">
+                           <label><input type="radio" name="rol_id" value="1"
+                                 <?php if ($datos["rol_id"] == 1) {echo "checked";} ?>>Admin</label>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="form-group col-md-12">
+                        <input type="submit" value="Añadir" name="submit" id="btRegistro">
+                     </div>
+                  </div>
+
+               </form>
+
+               <div id="campoMensajes">
+                  <?php if (isset($mensajes)) {
+    foreach ($mensajes as $mensaje) {?>
+                  <div class="alert alert-<?=$mensaje["tipo"]?>"><?=$mensaje["mensaje"]?></div>
+                  <?php }}?>
+               </div>
+
          </div>
-         <?php foreach ($mensajes as $mensaje): ?>
-            <div class="alert alert-<?=$mensaje["tipo"]?>"><?=$mensaje["mensaje"]?></div>
-         <?php endforeach;?>
-         <form action="?controller=user&accion=adduser" method="post" enctype="multipart/form-data">
-            <label for="txtnif">NIF
-               <input type="text" class="form-control" name="txtnif" required value="<?=$datos["txtnif"]?>" required></label>
-            <br />
-
-            <label for="txtnombre">Nombre
-               <input type="text" class="form-control" name="txtnombre" required value="<?=$datos["txtnombre"]?>" required></label>
-            <br />
-
-            <label for="txtapellido1">Primer apellido
-               <input type="text" class="form-control" name="txtapellido1" required value="<?=$datos["txtapellido1"]?>" required></label>
-            <br />
-
-            <label for="txtapellido2">Segundo apellido
-               <input type="text" class="form-control" name="txtapellido2" required value="<?=$datos["txtapellido2"]?>" required></label>
-            <br />
-
-            <label for="txtlogin">Nombre de usuario
-               <input type="text" class="form-control" name="txtlogin" required value="<?=$datos["txtlogin"]?>" required></label>
-            <br />
-
-            <label for="txtemail">Email
-               <input type="email" class="form-control" name="txtemail" value="<?=$datos["txtemail"]?>" required></label>
-            <br />
-
-            <label for="txtpass">Contraseña
-               <input type="password" class="form-control" name="txtpass" required value="<?=$datos["txtpass"]?>" required></label>
-            <br />
-
-            <label for="txttelefono">Telefono móvil
-               <input type="text" class="form-control" name="txttelefono" required value="<?=$datos["txttelefono"]?>" required></label>
-            <br />
-
-            <label for="txtdireccion">Direccion
-               <input type="text" class="form-control" name="txtdireccion" required value="<?=$datos["txtdireccion"]?>" required></label>
-            <br />
-
-            <label for="imagen">Imagen
-               <input type="file" name="imagen" class="form-control" value="<?=$datos["imagen"]?>" /></label>
-            </br>
-
-            <div class="radio-inline">
-               <label><input type="radio" name="rol_id" value="2" checked>Socio</label>
-            </div>
-
-            <div class="radio-inline">
-               <label><input type="radio" name="rol_id" value="1">Admin</label>
-            </div>
-            <input type="submit" value="Guardar" name="submit" class="btn btn-success">
-         </form>
       </div>
+
+   </section>
+
+   <?php require_once 'includes/Footer.php';?>
+   <?php require_once 'includes/cargaJs.php';?>
+
 </body>
 
 </html>
