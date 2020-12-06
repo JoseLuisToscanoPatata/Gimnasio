@@ -9,7 +9,7 @@
 
         <nav class="collapse" id="enlaces">
            <ul>
-              <li id="enlace1"> <a data-scroll href="?controller=index&accion=login">INICIO</a> </li>
+              <li id="enlace1"> <a data-scroll href="?controller=home&accion=index">INICIO</a> </li>
               <li id="enlace2"> <a data-scroll href="?controller=user&accion=listado">SOCIOS</a> </li>
               <li id="enlace3"> <a data-scroll href="?controller=activity&accion=listado">ACTIVIDADES</a> </li>
               <li id="enlace4"> <a data-scroll href="?controller=index&accion=register">TRAMOS</a> </li>

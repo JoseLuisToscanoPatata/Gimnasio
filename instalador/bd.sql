@@ -49,16 +49,16 @@ CREATE OR REPLACE TABLE usuario (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
- telefono, DIRECCION, rol_id, estado) VALUES (NULL, '12345678L', 'Manolo', 'Ortega', 'Cano', NULL, 'Patata',
-  'be949382d8cac177e839107051bda29dbc8a11cc', 'patata@manolo.com', 911223344, 'calle paco', 1, 1);
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '12345678T', 'Manolo', 'Ortega', 'Cano', NULL, 'Patata',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@manolo.com', 911223344, 'calle paco', 1, 1);
 
   INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
  telefono, DIRECCION, rol_id, estado) VALUES (NULL, '98765432P', 'Paca', 'Perez', 'Olga', NULL, 'Zanahoria',
-  'be949382d8cac177e839107051bda29dbc8a11cc', 'patata@paca.com', 111223344, 'calle doro', 2, 1);
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@paca.com', 111223344, 'calle doro', 2, 1);
 
 INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
  telefono, DIRECCION, rol_id, estado) VALUES (NULL, '44556677P', 'Lola', 'Ostia', 'Calvo', NULL, 'Coco',
-  'be949382d8cac177e839107051bda29dbc8a11cc', 'lola@paca.com', 666555444, 'calle mano', 2, 2);
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'lola@paca.com', 666555444, 'calle mano', 2, 2);
 
 CREATE OR REPLACE TABLE tramo_usuario (
    tramo_usu_id int(11) NOT NULL AUTO_INCREMENT,

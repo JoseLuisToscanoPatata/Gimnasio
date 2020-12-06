@@ -1,7 +1,3 @@
-<?php require_once 'includes/comprobarSesion.php'?>
-
-<!--TODO Cambiar formato-->
-
 <!DOCTYPE html>
 <html>
 

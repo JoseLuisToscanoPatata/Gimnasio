@@ -1,7 +1,3 @@
-<?php require_once 'includes/comprobarSesion.php'?>
-
-<!--TODO Cambiar formato-->
-
 <!DOCTYPE html>
 <html>
 
@@ -12,18 +8,18 @@
 <body>
 
    <section class="cuerpo">
-      <?php if($_SESSION['rol'] == 1) {
-          require_once 'includes/cabeceraAdmin.php';
-      } else {
-           require_once 'includes/cabeceraSocio.php';
-      } ?>
+      <?php if ($_SESSION['rol'] == 1) {
+    require_once 'includes/cabeceraAdmin.php';
+} else {
+    require_once 'includes/cabeceraSocio.php';
+}?>
 
-      <div class="text-xs-center bajar" id="cuerpoRegistro">
+      <div class="text-xs-center bajar" id="cuerpoPrincipal">
          <div class="container">
 
-            <h1 class="display-5 wow bounce font-weight-bold">REGISTRO</h2>
+            <h1 class="display-5 wow bounce font-weight-bold">USUARIO</h2>
 
-               <form action="?controller=user&accion=actuser" method="post" enctype="multipart/form-data"
+               <form action="?controller=user&accion=actuser&id=<?=$id?>" method="post" enctype="multipart/form-data"
                   id="formRegistro">
 
                   <div class="row">
@@ -36,7 +32,7 @@
                      <div class="form-group col-md-6">
                         <label for="nombre">Nombre: </label>
                         <input type="text" class="form-control" name="txtnombre" placeholder="Inserte su nombre"
-                           value="<?=$datos["txtnombre"]?>" required>
+                           value="<?=$datos["txtnombre"]?>" required maxlength="50">
                      </div>
                   </div>
 
@@ -44,13 +40,13 @@
                      <div class="form-group col-md-6">
                         <label for="Apellido1">Primer apellido: </label>
                         <input type="text" class="form-control" id="apellido1" name="txtapellido1"
-                           placeholder="Primer apellido.." value="<?=$datos["txtapellido1"]?>" required>
+                           placeholder="Primer apellido.." value="<?=$datos["txtapellido1"]?>" required maxlength="30">
                      </div>
 
                      <div class="form-group col-md-6">
                         <label for="apellido2">Segundo apellido: </label>
                         <input type="text" class="form-control" id="apellido2" name="txtapellido2"
-                           placeholder="Segundo apellido.." value="<?=$datos["txtapellido2"]?>" required>
+                           placeholder="Segundo apellido.." value="<?=$datos["txtapellido2"]?>" required maxlength="30">
                      </div>
                   </div>
 
@@ -58,14 +54,15 @@
                      <div class="form-group col-md-6">
                         <label for="usuario">Usuario: </label>
                         <input type="text" class="form-control" id="usuario" name="txtlogin"
-                           placeholder="Inserte su nombre de usuario" value="<?=$datos["txtlogin"]?>" required>
+                           placeholder="Inserte su nombre de usuario" value="<?=$datos["txtlogin"]?>" required
+                           maxlength="30">
                      </div>
 
                      <div class="form-group col-md-6">
                         <label for="password">Contraseña: </label>
                         <input type="<?php if ($_SESSION['id'] == $id) {echo 'password';} else {echo 'hidden';}?>"
                            class="form-control" id="password" name="txtpass" placeholder="Inserte su contraseña"
-                           value="<?=$datos["txtpass"]?>" required>
+                           value="<?=$datos["txtpass"]?>" required maxlength="30">
                      </div>
                   </div>
 
@@ -73,13 +70,14 @@
                      <div class="form-group col-md-6">
                         <label for="email">Email: </label>
                         <input type="email" class="form-control" id="email" name="txtemail"
-                           placeholder="Inserte su correo" value="<?=$datos["txtemail"]?>" required>
+                           placeholder="Inserte su correo" value="<?=$datos["txtemail"]?>" required maxlength="40">
                      </div>
 
                      <div class="form-group col-md-6">
                         <label for="direccion">Direccion: </label>
                         <input type="text" class="form-control" id="direccion" name="txtdireccion"
-                           placeholder="Inserte su dirección" value="<?=$datos["txtdireccion"]?>" required>
+                           placeholder="Inserte su dirección" value="<?=$datos["txtdireccion"]?>" required
+                           maxlength="40">
                      </div>
                   </div>
 
@@ -106,16 +104,16 @@
                      <div class="form-group col-md-3">
 
                         <div class="radio-inline">
-                           <label><input type="radio" name="rol_id" value="2" <?php if ($datos["rol_id"] == 2) {echo "checked";} else  
-                                 if(($_SESSION['id'] == $id ) || ($_SESSION['id'] == 2)) {
-                                   echo "disabled";}?>>Socio</label>
+                           <label><input type="radio" name="rol_id" value="2" <?php if ($datos["rol_id"] == 2) {echo "checked";} else
+if (($_SESSION['id'] == $id) || ($_SESSION['id'] == 2)) {
+    echo "disabled";}?>>Socio</label>
                         </div>
 
                         <div class="radio-inline">
                            <label><input type="radio" name="rol_id" value="1" <?php if ($datos["rol_id"] == 1) {echo "checked";} else
-                                      if(($_SESSION['id'] == $id ) || ($_SESSION['id'] == 2)) {
-                                   echo "disabled";}
-                                 ?>>Admin</label>
+if (($_SESSION['id'] == $id) || ($_SESSION['id'] == 2)) {
+    echo "disabled";}
+?>>Admin</label>
                         </div>
                      </div>
                   </div>

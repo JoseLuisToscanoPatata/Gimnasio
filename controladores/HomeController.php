@@ -12,6 +12,8 @@ class HomeController extends BaseController
 
     public function index()
     {
+require_once CHECK_SESSION_FILE;
+
         $parametros = [
             "tituloventana" => "Página de inicio",
         ];

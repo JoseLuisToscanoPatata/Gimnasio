@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-
-<!--TODO Cambiar formato-->
-
 <html>
 
 <head>
@@ -14,7 +10,7 @@
 
       <?php require_once 'includes/cabeceraOut.php';?>
 
-      <div class="text-xs-center bajar" id="cuerpoLogin">
+      <div class="text-xs-center bajar" id="cuerpoPrincipal">
          <div class="container">
 
 

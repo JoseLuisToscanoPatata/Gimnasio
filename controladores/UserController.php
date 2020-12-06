@@ -36,6 +36,7 @@ class UserController extends BaseController
      */
     public function listado()
     {
+        require_once CHECK_SESSION_FILE;
         // Almacenamos en el array 'parametros[]'los valores que vamos a mostrar en la vista
         $parametros = [
             "tituloventana" => "Lista de usuarios",
@@ -71,6 +72,8 @@ class UserController extends BaseController
      */
     public function deluser()
     {
+
+        require_once CHECK_SESSION_FILE;
         // verificamos que hemos recibido los parámetros desde la vista de listado
         if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
             $id = $_GET["id"];
@@ -101,6 +104,8 @@ class UserController extends BaseController
 
     public function adduser()
     {
+
+        require_once CHECK_SESSION_FILE;
         // Array asociativo que almacenará los mensajes de error que se generen por cada campo
         $errores = array();
         // Si se ha pulsado el botón guardar...
@@ -112,11 +117,24 @@ class UserController extends BaseController
             $apellido2 = $_POST['txtapellido2'];
             $login = $_POST['txtlogin'];
             $email = $_POST['txtemail'];
-            $password = sha1($_POST['txtpass']);
+            $password = $_POST['txtpass'];
             $telefono = $_POST['txttelefono'];
             $direccion = $_POST['txtdireccion'];
             $rol_id = $_POST['rol_id'];
 
+            $datosSaneados = $this->modelo->sanearValores([
+                'nif' => $nif,
+                'nombre' => $nombre,
+                'apellido1' => $apellido1,
+                'apellido2' => $apellido2,
+                'login' => $login,
+                "password" => $password,
+                'email' => $email,
+                'telefono' => $telefono,
+                'direccion' => $direccion,
+            ]);
+
+            $errores = $this->modelo->comprobarRestricciones($datosSaneados);
             /* Realizamos la carga de la imagen en el servidor */
             //       Comprobamos que el campo tmp_name tiene un valor asignado para asegurar que hemos
             //       recibido la imagen correctamente
@@ -178,10 +196,14 @@ class UserController extends BaseController
                     ];
                 endif;
             } else {
-                $this->mensajes[] = [
-                    "tipo" => "danger",
-                    "mensaje" => "Datos de registro de usuario erróneos!! :(",
-                ];
+
+                foreach ($errores as &$error) {
+                    $this->mensajes[] = [
+                        "tipo" => "danger",
+                        "mensaje" => $error,
+                    ];
+                }
+
             }
         }
 
@@ -213,6 +235,7 @@ class UserController extends BaseController
      */
     public function actuser()
     {
+        require_once CHECK_SESSION_FILE;
         // Array asociativo que almacenará los mensajes de error que se generen por cada campo
         $errores = array();
         // Inicializamos valores de los campos de texto
@@ -241,6 +264,20 @@ class UserController extends BaseController
             $nuevodireccion = $_POST['txtdireccion'];
             $nuevaimagen = "";
             $nuevapassword = $_POST['txtpass'];
+
+            $datosSaneados = $this->modelo->sanearValores([
+                'nif' => $nuevonif,
+                'nombre' => $nuevonombre,
+                'apellido1' => $nuevoapellido1,
+                'apellido2' => $nuevoapellido2,
+                'login' => $nuevologin,
+                "password" => $nuevapassword,
+                'email' => $nuevoemail,
+                'telefono' => $nuevotelefono,
+                'direccion' => $nuevadireccion,
+            ]);
+
+            $errores = $this->modelo->comprobarRestricciones($datosSaneados);
 
             // Definimos la variable $imagen que almacenará el nombre de imagen
             // que almacenará la Base de Datos inicializada a NULL
@@ -289,7 +326,7 @@ class UserController extends BaseController
                     'direccion' => $nuevodireccion,
                     'imagen' => $nuevaimagen,
                     'rol_id' => $nuevorol_id,
-                    'password' => sha1($nuevapassword),
+                    'password' => $nuevapassword,
                 ]);
                 //Analizamos cómo finalizó la operación de registro y generamos un mensaje
                 //indicativo del estado correspondiente
@@ -305,10 +342,13 @@ class UserController extends BaseController
                     ];
                 endif;
             } else {
-                $this->mensajes[] = [
-                    "tipo" => "danger",
-                    "mensaje" => "No se ha podido obtener los datos del usuario correectamente!! :(",
-                ];
+                foreach ($errores as &$error) {
+                    $this->mensajes[] = [
+                        "tipo" => "danger",
+                        "mensaje" => $error,
+                    ];
+                }
+
             }
 
             // Obtenemos los valores para mostrarlos en los campos del formulario
@@ -379,5 +419,48 @@ class UserController extends BaseController
         ];
         //Mostramos la vista actuser
         $this->view->show("ActUser", $parametros);
+    }
+
+    public function cambiarEstado()
+    {
+
+        require_once CHECK_SESSION_FILE;
+
+        // verificamos que hemos recibido los parámetros desde la vista de listado
+        if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
+            $id = $_GET["id"];
+            $cambio = $_GET["cambio"];
+
+            if ($_SESSION['id'] == $id) {
+                $this->mensajes[] = [
+                    "tipo" => "danger",
+                    "mensaje" => "No puedes deshabilitarte a ti mismo!! :(",
+                ];
+            } else {
+                //Realizamos la operación de suprimir el usuario con el id=$id
+                $resultModelo = $this->modelo->cambiarEstado($id, $cambio);
+                //Analizamos el valor devuelto por el modelo para definir el mensaje a
+                //mostrar en la vista listado
+                if ($resultModelo["correcto"]) {
+                    $this->mensajes[] = [
+                        "tipo" => "success",
+                        "mensaje" => "El estado del usuario $id se cambió correctamente",
+                    ];
+                } else {
+                    $this->mensajes[] = [
+                        "tipo" => "danger",
+                        "mensaje" => "El cambio de estado del usuario no se realizó correctamente!! :( <br/>({$resultModelo["error"]})",
+                    ];
+                }
+            }
+
+        } else { //Si no recibimos el valor del parámetro $id generamos el mensaje indicativo:
+            $this->mensajes[] = [
+                "tipo" => "danger",
+                "mensaje" => "No se pudo acceder a la id del usuario cuyo estado desea actualizar!! :(",
+            ];
+        }
+        //Realizamos el listado de los usuarios
+        $this->listado();
     }
 }

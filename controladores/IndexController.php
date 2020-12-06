@@ -76,12 +76,20 @@ class IndexController extends BaseController
 
             if ((isset($_POST['usuario']) && isset($_POST['password'])) && (!empty($_POST['usuario']) && !empty($_POST['password']))) {
 
-                $resultModelo = $this->modelo->loginCorrecto($_POST['usuario'], $_POST['password']);
+                $datosSaneados = $this->modelo->sanearValores([
+                    "usuario" => $_POST['usuario'],
+                    "password" => $_POST['password'],
+                ]);
+
+                $usuarioSaneado = $datosSaneados['usuario'];
+                $passwordSaneada = $datosSaneados['password'];
+
+                $resultModelo = $this->modelo->loginCorrecto($usuarioSaneado, $passwordSaneada);
 
                 if ($resultModelo["correcto"] == 1) {
 
                     session_start();
-                    $_SESSION['logueado'] = $_POST['usuario'];
+                    $_SESSION['logueado'] = $usuarioSaneado;
                     $_SESSION['rol'] = $resultModelo['datos']['rol_id'];
                     $_SESSION['id'] = $resultModelo['datos']['usuario_id'];
                     $_SESSION['hora'] = date("H:i:s");
@@ -172,9 +180,23 @@ class IndexController extends BaseController
             $apellido2 = $_POST['txtapellido2'];
             $login = $_POST['txtlogin'];
             $email = $_POST['txtemail'];
-            $password = sha1($_POST['txtpass']);
+            $password = $_POST['txtpass'];
             $telefono = $_POST['txttelefono'];
             $direccion = $_POST['txtdireccion'];
+
+            $datosSaneados = $this->modelo->sanearValores([
+                'nif' => $nif,
+                'nombre' => $nombre,
+                'apellido1' => $apellido1,
+                'apellido2' => $apellido2,
+                'login' => $login,
+                "password" => $password,
+                'email' => $email,
+                'telefono' => $telefono,
+                'direccion' => $direccion,
+            ]);
+
+            $errores = $this->modelo->comprobarRestricciones($datosSaneados);
 
             /* Realizamos la carga de la imagen en el servidor */
             //       Comprobamos que el campo tmp_name tiene un valor asignado para asegurar que hemos
@@ -237,10 +259,13 @@ class IndexController extends BaseController
                     ];
                 }
             } else {
-                $this->mensajes[] = [
-                    "tipo" => "danger",
-                    "mensaje" => "Datos de registro de usuario erróneos!! :(",
-                ];
+                foreach ($errores as &$error) {
+                    $this->mensajes[] = [
+                        "tipo" => "danger",
+                        "mensaje" => $error,
+                    ];
+                }
+
             }
         }
 

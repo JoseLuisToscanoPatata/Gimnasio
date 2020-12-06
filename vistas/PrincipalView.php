@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 
-<!--<p>Bienvenido <?php if (isset($_SESSION['logueado'])) {echo $_SESSION['logueado'];}?></p>-->
-
 <html>
 
 <head>

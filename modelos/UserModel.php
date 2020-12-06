@@ -76,6 +76,40 @@ class UserModel extends BaseModel
         } catch (PDOException $ex) { //Si pasa por aquí, correcto seguirá siendo 0, que significará que ha petado
             $resultado["error"] = $ex->getMessage();
         }
+        return $resultado;
+    }
+
+    /**
+     * Función que habilita o deshabilita un usuario, usada al pulsar el switch correspondiente en la tabla de usuarios
+     *
+     * @param [number] $int Id del usuario cuyo estado queremos cambiar
+     * @param [string] $cambio variable que especifica si queremos habilitarlo o deshabilitarlo
+     * @return array con el resultado y los posibles errores de la operación
+     */
+    public function cambiarEstado($id, $cambio)
+    {
+
+        $resultado = [
+            "correcto" => false,
+            "error" => null,
+        ];
+
+        try {
+
+            if ($cambio == "activar") {
+                $sql = "UPDATE usuario set estado = 1 where usuario_id = :id";
+            } else {
+                $sql = "UPDATE usuario set estado = 2 where usuario_id = :id";
+            }
+
+            $resultquery = $this->db->prepare($sql);
+            $resultquery->execute(['id' => $id]);
+
+            $resultado["correcto"] = true;
+
+        } catch (PDOException $ex) {
+            $resultado["error"] = $ex->getMessage();
+        }
 
         return $resultado;
     }
@@ -163,39 +197,42 @@ class UserModel extends BaseModel
             "error" => null,
         ];
 
-        //FALTA PONER VALIDACIÓN Y
+        if ($this->comprobarRepeticion($datos, "nuevo")['existe'] == true) {
+            $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
+        } else {
 
-        try {
-            //Inicializamos la transacción
-            $this->db->beginTransaction();
-            //Definimos la instrucción SQL parametrizada
-            $sql = "INSERT INTO usuario(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
+            try {
+                //Inicializamos la transacción
+                $this->db->beginTransaction();
+                //Definimos la instrucción SQL parametrizada
+                $sql = "INSERT INTO usuario(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
                          VALUES (:nif, :nombre, :apellido1, :apellido2, :imagen, :login, :password,:email , :telefono, :direccion, :rol_id)";
-            // Preparamos la consulta...
-            $query = $this->db->prepare($sql);
-            // y la ejecutamos indicando los valores que tendría cada parámetro
-            $query->execute([
-                'nif' => $datos["nif"],
-                'nombre' => $datos["nombre"],
-                'apellido1' => $datos["apellido1"],
-                'apellido2' => $datos["apellido2"],
-                'imagen' => $datos["imagen"],
-                'login' => $datos["login"],
-                'password' => $datos["password"],
-                'email' => $datos["email"],
-                'telefono' => $datos["telefono"],
-                'direccion' => $datos["direccion"],
-                'rol_id' => $datos["rol_id"],
-            ]); //Supervisamos si la inserción se realizó correctamente...
+                // Preparamos la consulta...
+                $query = $this->db->prepare($sql);
+                // y la ejecutamos indicando los valores que tendría cada parámetro
+                $query->execute([
+                    'nif' => $datos["nif"],
+                    'nombre' => $datos["nombre"],
+                    'apellido1' => $datos["apellido1"],
+                    'apellido2' => $datos["apellido2"],
+                    'imagen' => $datos["imagen"],
+                    'login' => $datos["login"],
+                    'password' => sha1($datos["password"]),
+                    'email' => $datos["email"],
+                    'telefono' => $datos["telefono"],
+                    'direccion' => $datos["direccion"],
+                    'rol_id' => $datos["rol_id"],
+                ]); //Supervisamos si la inserción se realizó correctamente...
 
-            if ($query) {
-                $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
-                $resultado["correcto"] = true;
-            } // o no :(
-        } catch (PDOException $ex) {
-            $this->db->rollback(); // rollback() se revierten los cambios realizados durante la transacción
-            $resultado["error"] = $ex->getMessage();
-            //die();
+                if ($query) {
+                    $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
+                    $resultado["correcto"] = true;
+                } // o no :(
+            } catch (PDOException $ex) {
+                $this->db->rollback(); // rollback() se revierten los cambios realizados durante la transacción
+                $resultado["error"] = $ex->getMessage();
+                //die();
+            }
         }
 
         return $resultado;
@@ -208,35 +245,41 @@ class UserModel extends BaseModel
             "error" => null,
         ];
 
-        try {
-            //Inicializamos la transacción
-            $this->db->beginTransaction();
-            //Definimos la instrucción SQL parametrizada
-            $sql = "UPDATE usuario SET usu_nombre= :nombre, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
+        if ($this->comprobarRepeticion($datos, "existente")['existe'] == true) {
+            $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
+        } else {
+
+            try {
+                //Inicializamos la transacción
+                $this->db->beginTransaction();
+                //Definimos la instrucción SQL parametrizada
+                $sql = "UPDATE usuario SET usu_nombre= :nombre, login = :login, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
          direccion = :direccion, rol_id = :rol_id WHERE usuario_id=:id";
-            $query = $this->db->prepare($sql);
-            $query->execute([
-                'id' => $datos["id"],
-                'nif' => $datos["nif"],
-                'password' => $datos["password"],
-                'nombre' => $datos["nombre"],
-                'email' => $datos["email"],
-                'imagen' => $datos["imagen"],
-                'apellido1' => $datos["apellido1"],
-                'apellido2' => $datos["apellido2"],
-                'telefono' => $datos["telefono"],
-                'direccion' => $datos["direccion"],
-                'rol_id' => $datos["rol_id"],
-            ]);
-            //Supervisamos si la inserción se realizó correctamente...
-            if ($query) {
-                $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
-                $resultado["correcto"] = true;
-            } // o no :(
-        } catch (PDOException $ex) {
-            $this->db->rollback(); // rollback() se revierten los cambios realizados durante la transacción
-            $resultado["error"] = $ex->getMessage();
-            //die();
+                $query = $this->db->prepare($sql);
+                $query->execute([
+                    'id' => $datos["id"],
+                    'nif' => $datos["nif"],
+                    'password' => sha1($datos["password"]),
+                    'login' => $datos['login'],
+                    'nombre' => $datos["nombre"],
+                    'email' => $datos["email"],
+                    'imagen' => $datos["imagen"],
+                    'apellido1' => $datos["apellido1"],
+                    'apellido2' => $datos["apellido2"],
+                    'telefono' => $datos["telefono"],
+                    'direccion' => $datos["direccion"],
+                    'rol_id' => $datos["rol_id"],
+                ]);
+                //Supervisamos si la inserción se realizó correctamente...
+                if ($query) {
+                    $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
+                    $resultado["correcto"] = true;
+                } // o no :(
+            } catch (PDOException $ex) {
+                $this->db->rollback(); // rollback() se revierten los cambios realizados durante la transacción
+                $resultado["error"] = $ex->getMessage();
+                //die();
+            }
         }
 
         return $resultado;
@@ -267,5 +310,110 @@ class UserModel extends BaseModel
         }
 
         return $resultado;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $valores Datos introducidos sin sanear
+     * @return [array] $valores Datos saneados, elimiando carácteres especiales
+     */
+    public function sanearValores($valores)
+    {
+        array_walk_recursive($valores, function (&$valor) {
+            $valor = trim(filter_var($valor, FILTER_SANITIZE_STRING));
+        });
+
+        return $valores;
+    }
+
+    /**
+     * función que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
+     *  cumple con las restricciones establecidas de formato para estas
+     *
+     * @param [type] $datos Array con los datos establecidos
+     * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
+     */
+    public function comprobarRestricciones($datos)
+    {
+
+        $errores = array();
+
+        if (!preg_match("/^[0-9]{8}(?![OUILÑ])[a-zA-Z]$/", $datos["nif"])) {
+            $errores["DNI"] = "No has introducido un DNI válido!!<br>";
+        }
+
+        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+(\s[a-zA-ZáÁéÉíÍóÓúÚ]+)*$/", $datos["nombre"])) {
+            $errores["nombre"] = "No has introducido un nombre válido!!<br>";
+        }
+
+        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+$/", $datos["apellido1"])) {
+            $errores["apellido1"] = "No has introducido un primer apellido válido!!<br>";
+        }
+
+        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+$/", $datos["apellido2"])) {
+            $errores["apellido2"] = "No has introducido un segundo apellido válido!!<br>";
+        }
+
+        if (!preg_match("/^[\S]+$/", $datos["login"])) {
+            $errores["usuario"] = "No has introducido un nombre de usuario válido!!<br>";
+        }
+
+        if (!preg_match("/^\w+([\.-_]?w+)*@\w+(\.(com|es|net|org|yahoo))+$/", $datos["email"])) {
+            $errores["email"] = "No has introducido una dirección de correo válida!!<br>";
+        }
+
+        if (!preg_match("/^(?=.*[0-9])(?=.*[!@#$%^&*-])(?=.*[A-Z]).{8,}$/", $datos["password"])) {
+            $errores["password"] = "No has introducido una contraseña válida!!<br>";
+        }
+
+        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+(\s[a-zA-ZáÁéÉíÍóÓúÚ0-9]+)*$/", $datos["direccion"])) {
+            $errores["direccion"] = "No has introducido una dirección válida!!<br>";
+        }
+
+        if (!preg_match("/^[986][0-9]{8}$/", $datos["telefono"])) {
+            $errores["telefono"] = "No has introducido un telefono válido!!<br>";
+        }
+
+        return $errores;
+
+    }
+
+    /**
+     * Función que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
+     *
+     * @param [type] $datosUsu datos del usuario a introducir
+     * @param [type] $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
+     * @return void Array con el resultado de la consulta y un error, en caso de que se provocase
+     */
+    public function comprobarRepeticion($datosUsu, $modo)
+    {
+
+        $resultado = [
+            "existe" => false,
+            "error" => null,
+        ];
+
+        try {
+
+            if ($modo == "nuevo") {
+                $sql = "SELECT * from usuario where (nif = :nif) OR (login = :login) or (email = :email)";
+                $resultquery = $this->db->prepare($sql);
+                $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email']]);
+
+            } else {
+                $sql = "SELECT * from usuario where ((nif = :nif) OR (login = :login) or (email = :email)) AND (usuario_id <> :id)";
+                $resultquery = $this->db->prepare($sql);
+                $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email'], 'usuario_id' => $datosUsu['id']]);
+            }
+
+            if ($resultquery->rowCount() > 0) {
+                $resultado["existe"] = true;
+            }
+        } catch (PDOException $ex) { //Si pasa por aquí, correcto seguirá siendo 0, que significará que ha petado
+            $resultado["error"] = $ex->getMessage();
+        }
+        return $resultado;
+
     }
 }
