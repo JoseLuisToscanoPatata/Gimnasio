@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Inclusión de los archivos que contienen las clases de core
  * Cuando PHP usa una clase que no encuentra va a llamar a la función anónima definida en el callback
@@ -9,10 +10,11 @@ spl_autoload_register(function ($nombre) {
    require 'core/' . $nombre . '.php';
 });
 
+require __DIR__ . '/vendor/autoload.php';
+
 try {
    //Lo iniciamos con su método estático main.
    FrontController::main();
 } catch (\Exception $e) {
    echo $e->getMessage();
 }
-

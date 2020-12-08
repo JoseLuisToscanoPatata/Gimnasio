@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Clase que hace de motor de plantillas, aunque con pocas funcionalidades. Sólo nos permite incluir una plantilla y asignarle variables
  */
@@ -6,7 +7,6 @@ class View
 {
    /**
     * Muestra una vista y pasa un array de valores
-    *
     * @param string $name Nombre de nuestra vista, por ej, Login
     * @param array $vars Contenedor de variables, es un array del tipo clave => valor (opcional).
     * @return void
@@ -14,7 +14,7 @@ class View
    public function show($name, $vars = array())
    {
       //Creamos la ruta real a la plantilla
-      $path = VIEWS_FOLDER . ucwords($name). 'View.php';
+      $path = VIEWS_FOLDER . ucwords($name) . 'View.php';
 
       //Si no existe el fichero en cuestion, lanzamos una excepción
       if (file_exists($path) == false)
@@ -28,13 +28,7 @@ class View
       }
 
       //Finalmente, incluimos el archivo plantilla o vista.
-      
+
       require_once($path);
    }
 }
-
-/*
-El uso es bastante sencillo:
-$vista = new View();
-$vista->show('listar.php', array("nombre" => "Juan"));
-*/

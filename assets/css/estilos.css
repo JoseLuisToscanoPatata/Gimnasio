@@ -113,7 +113,7 @@
 }
 
 .bajar {
-	margin-top: 6rem;
+	margin-top: 10rem;
 	margin-bottom: 6rem;
 }
 
@@ -145,6 +145,8 @@
 /**CSS para la ventana de login*/
 
 #btEntrar {
+	margin-bottom: 2rem;
+	margin-left: 5rem;
 	border-radius: 20px;
 	border: 0;
 	height: 50px;
@@ -229,6 +231,69 @@
   border: none;
   box-sizing: border-box;
 }
+
+#paginasUsuarios {
+	position: relative;
+	left: 35%;
+	 background-color:#ff73c0 !important;
+}
+
+#paginasUsuarios a {
+	color: white;
+}
+
+#paginasUsuarios ul a {
+	color: #ff73c0;
+	padding-left: 10px;
+}
+
+/**CSS para la página del listado de actividades*/
+
+#paginasActividades {
+	position: relative;
+	left: 55%;
+	 background-color:#ff73c0 !important;
+}
+
+#paginasActividades ul a {
+	color: #ff73c0;
+	padding-left: 10px;
+}
+
+#paginasActividades a {
+	color: white;
+}
+
+#actividades tr th, #actividades tr th a {
+	color: white;
+}
+
+
+#actividades td {
+	line-height: 35px;
+	border: none;
+}
+
+#actividades td {
+  position: relative;
+}
+
+#actividades td input {
+  position: absolute;
+  display: block;
+  top:0;
+  left:0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  border: none;
+  box-sizing: border-box;
+}
+
+/**CSS para la página de inicio de usuarios*/
+
+
+
 /**CSS para el pie de página*/
 
 footer {

@@ -6,9 +6,6 @@
  */
 class UserModel extends BaseModel
 {
-/**
- *
- */
     private $id;
 
     private $nombre;
@@ -31,23 +28,31 @@ class UserModel extends BaseModel
 
     private $estado;
 
+    /**
+     * Constructor que se onecta a la base de datos y establece la tabla de este modelo
+     */
     public function __construct()
     {
-        // Se conecta a la BD
         parent::__construct();
         $this->table = "usuario";
     }
 
+
     /**
      * Función que comprueba si existe una fila en la tabla usuarios, con los valores introducidos
      * Sirve para comprobar si hemos introducido datos válidos en el logueo de la aplicación
-     * -'correcto': indica si hay o no un usuario con esos datos
-     * -'datos': almacena todos los datos obtenidos de la consulta, en caso de que existan
-     * -'error': almacena el mensaje asociado a una situación errónea (excepción)
+     * @param [string] $usuario Nombre de usuario introducido
+     * @param [string] $contrase Contraseña introducida
+     * @return void Devuelve el array con los parámetros
      */
     public function loginCorrecto($usuario, $contraseña)
     {
 
+        /**
+         * * -'correcto': indica si hay o no un usuario con esos datos
+         * -'datos': almacena todos los datos obtenidos de la consulta, en caso de que existan
+         * -'error': almacena el mensaje asociado a una situación errónea (excepción)
+         */
         $resultado = [
             "correcto" => 0,
             "datos" => null,
@@ -55,10 +60,11 @@ class UserModel extends BaseModel
         ];
 
         try {
-            $sql = "SELECT * from usuario where ((login = :login) and(password = :password))";
+            $sql = "SELECT * from $this->table where ((login = :login) and(password = :password))";
 
             $resultquery = $this->db->prepare($sql);
-            $resultquery->execute(['login' => $usuario,
+            $resultquery->execute([
+                'login' => $usuario,
                 'password' => sha1($contraseña),
             ]);
 
@@ -80,8 +86,91 @@ class UserModel extends BaseModel
     }
 
     /**
+     *Método que realiza el proceso de registro y/o login de usuarios mediante cuentas de google
+     * @param [type] $datos Email y tipo de autentificación utilizada por el usuario
+     * @return void
+     */
+    public function logingoogle($datos)
+    {
+
+        $resultado = [
+            "datos" => [],
+            "correcto" => false,
+            "mensaje" => '',
+        ];
+
+        if (!empty($datos)) {
+
+            $existe = "SELECT * from $this->table where autentificacion = :autentificacion and idgoogle = :idgoogle";
+            $comprobar = $this->db->prepare($existe);
+            $comprobar->execute(['autentificacion' => $datos['autentificacion'], 'idgoogle' => $datos['idgoogle']]);
+
+            if ($comprobar->rowCount() > 0) {
+
+                try {
+
+                    $this->db->beginTransaction();
+                    $actualizar = "UPDATE $this->table set email = :email where autentificacion = :autentificacion and idgoogle = :idgoogle";
+
+                    $actualizacion = $this->db->prepare($actualizar);
+                    $actualizacion->execute(['autentificacion' => $datos['autentificacion'], 'idgoogle' => $datos['idgoogle'], 'email' => $datos['email']]);
+
+                    if ($actualizacion) {
+                        $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
+                        $resultado["correcto"] = true;
+                    }
+                } catch (PDOException $ex) {
+
+                    $this->db->rollback();
+                    $resultado["mensaje"] = $ex->getMessage();
+                }
+            } else {
+
+                try {
+
+                    $this->db->beginTransaction();
+                    //Definimos la instrucción SQL parametrizada
+                    $insertar = "INSERT INTO $this->table(nif, usu_nombre, apellido1, apellido2, login,  password, email, telefono, direccion, rol_id)
+                         VALUES (:nif, :nombre, :apellido1, :apellido2, :login, :password,:email , :telefono, :direccion, :rol_id, auntentificacion = :autentificacion, idgoogle = :idgoogle)";
+                    // Preparamos la consulta...
+                    $insertando = $this->db->prepare($insertar);
+                    // y la ejecutamos indicando los valores que tendría cada parámetro
+                    $insertando->execute([
+                        'nif' => 'N/A',
+                        'nombre' => 'MANOLO',
+                        'apellido1' => 'N/A',
+                        'apellido2' => 'N/A',
+                        'login' => $datos["email"],
+                        'password' => $datos["email"],
+                        'email' => $datos["email"],
+                        'telefono' => 000000000,
+                        'direccion' => 'N/A',
+                        'rol_id' => 2,
+                        'autentificacion' => $datos["autentificacion"],
+                        'idgoogle' => $datos["idgoogle"],
+                    ]);
+
+                    if ($insertando) {
+                        $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
+                        $resultado["correcto"] = true;
+                        $resultado["mensaje"] = "Bienvenido a la web, recuerda cambiar tus datos de usuario!!";
+                    } // o no :(
+                } catch (PDOException $ex) {
+
+                    $this->db->rollback();
+                    $resultado["mensaje"] = $ex->getMessage();
+                }
+            }
+
+            if ($resultado["correcto"] == true) {
+                $datosUsuario = $this->db->query($comprobar);
+                $resultado['datos'] = $datosUsuario->fetch(PDO::FETCH_ASSOC);
+            }
+        }
+    }
+
+    /**
      * Función que habilita o deshabilita un usuario, usada al pulsar el switch correspondiente en la tabla de usuarios
-     *
      * @param [number] $int Id del usuario cuyo estado queremos cambiar
      * @param [string] $cambio variable que especifica si queremos habilitarlo o deshabilitarlo
      * @return array con el resultado y los posibles errores de la operación
@@ -89,6 +178,10 @@ class UserModel extends BaseModel
     public function cambiarEstado($id, $cambio)
     {
 
+        /**
+         * * -'correcto': indica si hay o no un usuario con esos datos
+         * -'error': almacena el mensaje asociado a una situación errónea (excepción)
+         */
         $resultado = [
             "correcto" => false,
             "error" => null,
@@ -96,18 +189,23 @@ class UserModel extends BaseModel
 
         try {
 
+            $this->db->beginTransaction();
+            //Sgún queramos activar o desactivar el usuario, usamos una consulta u otra
             if ($cambio == "activar") {
-                $sql = "UPDATE usuario set estado = 1 where usuario_id = :id";
+                $sql = "UPDATE $this->table set estado = 1 where usuario_id = :id";
             } else {
-                $sql = "UPDATE usuario set estado = 2 where usuario_id = :id";
+                $sql = "UPDATE $this->table set estado = 2 where usuario_id = :id";
             }
 
             $resultquery = $this->db->prepare($sql);
             $resultquery->execute(['id' => $id]);
 
-            $resultado["correcto"] = true;
-
+            if ($resultquery) {
+                $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
+                $resultado["correcto"] = true;
+            }
         } catch (PDOException $ex) {
+            $this->db->rollback();
             $resultado["error"] = $ex->getMessage();
         }
 
@@ -116,26 +214,56 @@ class UserModel extends BaseModel
 
     /**
      * Función que realiza el listado de todos los usuarios registrados
-     * Devuelve un array asociativo con tres campos:
-     * -'correcto': indica si el listado se realizó correctamente o no.
-     * -'datos': almacena todos los datos obtenidos de la consulta.
-     * -'error': almacena el mensaje asociado a una situación errónea (excepción)
-     * @return type
+     * @return type Devuelve el array con los parámetros
      */
     public function listado()
     {
+        /**
+         *  -'correcto': indica si el listado se realizó correctamente o no.
+         * -'datos': almacena todos los datos obtenidos de la consulta.
+         * -'error': almacena el mensaje asociado a una situación errónea (excepción)
+         * -'paginacion: almacena los datos necesarios para la paginación
+         */
+
         $resultado = [
             "correcto" => false,
             "datos" => null,
             "error" => null,
+            "paginacion" => [],
         ];
+
+        $orden = (isset($_GET['orden'])) ?  $_GET['orden'] : 'asc';
+
+        $columna = (isset($_GET['columna'])) ?  $_GET['columna'] : 'usuario_id';
+
+        //Establecemos el número de registros a mostrar por página,por defecto 2
+        $regsxpag = (isset($_GET['regsxpag'])) ? (int) $_GET['regsxpag'] : 3;
+        //Establecemos la página que vamos a mostrar, por página,por defecto la 1
+        $pagina = (isset($_GET['pagina'])) ? (int) $_GET['pagina'] : 1;
+
+        $resultado['paginacion']["regsxpag"] = $regsxpag;
+        $resultado['paginacion']['pagina'] = $pagina;
+        $resultado['paginacion']['orden'] = $orden;
+        $resultado['paginacion']['columna'] = $columna;
+
+        //Definimos la variable $inicio que indique la posición del registro desde el que se
+        // mostrarán los registros de una página dentro de la paginación.
+        $offset = ($pagina > 1) ? (($pagina - 1) * $regsxpag) : 0;
+
+        //Calculamos el número de registros obtenidos
+        $totalregistros = $this->db->query("SELECT count(*) as total FROM usuario");
+        $totalregistros = $totalregistros->fetch()['total'];
+
+        $resultado['paginacion']['numpaginas'] = ceil($totalregistros / $regsxpag);
+
         //Realizamos la consulta...
         try { //Definimos la instrucción SQL
-            $sql = "SELECT * FROM usuario";
+            $sql = "SELECT * FROM $this->table order by $columna $orden LIMIT $regsxpag OFFSET $offset";
             // Hacemos directamente la consulta al no tener parámetros
-            $resultsquery = $this->db->query($sql);
+            $resultsquery = $this->db->prepare($sql);
+            $resultsquery->execute();
             //Supervisamos si la inserción se realizó correctamente...
-            if ($resultsquery):
+            if ($resultsquery) :
                 $resultado["correcto"] = true;
                 $resultado["datos"] = $resultsquery->fetchAll(PDO::FETCH_ASSOC);
             endif; // o no :(
@@ -149,7 +277,7 @@ class UserModel extends BaseModel
     /**
      * Método que elimina el usuario cuyo id es el que se le pasa como parámetro
      * @param $id es un valor numérico. Es el campo clave de la tabla
-     * @return boolean
+     * @return boolean Array con el resultado, true o false, y con los errores en el último caso
      */
     public function deluser($id)
     {
@@ -166,7 +294,7 @@ class UserModel extends BaseModel
                 //Inicializamos la transacción
                 $this->db->beginTransaction();
                 //Definimos la instrucción SQL parametrizada
-                $sql = "DELETE FROM usuario WHERE usuario_id=:id";
+                $sql = "DELETE FROM $this->table WHERE usuario_id=:id";
                 $query = $this->db->prepare($sql);
                 $query->execute(['id' => $id]);
                 //Supervisamos si la eliminación se realizó correctamente...
@@ -186,9 +314,9 @@ class UserModel extends BaseModel
     }
 
     /**
-     *
-     * @param type $datos
-     * @return type
+     *Método que añade un usuario a la base de datos, cuyos datos hemos introducido previamente por un formulario
+     * @param type $datos Datos del usuario a crear
+     * @return type Array con el resultado, true o false, y con los errores en el último caso
      */
     public function adduser($datos)
     {
@@ -197,7 +325,7 @@ class UserModel extends BaseModel
             "error" => null,
         ];
 
-        if ($this->comprobarRepeticion($datos, "nuevo")['existe'] == true) {
+        if ($this->comprobarRepeticion($datos, "nuevo")['existe'] == true) { //Comprobamos que no hayamos introducido datos ya existentes
             $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
         } else {
 
@@ -205,7 +333,7 @@ class UserModel extends BaseModel
                 //Inicializamos la transacción
                 $this->db->beginTransaction();
                 //Definimos la instrucción SQL parametrizada
-                $sql = "INSERT INTO usuario(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
+                $sql = "INSERT INTO $this->table(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
                          VALUES (:nif, :nombre, :apellido1, :apellido2, :imagen, :login, :password,:email , :telefono, :direccion, :rol_id)";
                 // Preparamos la consulta...
                 $query = $this->db->prepare($sql);
@@ -238,6 +366,11 @@ class UserModel extends BaseModel
         return $resultado;
     }
 
+    /**
+     * Método que actualiza un elemento de la tabla usuario, con los datos que hayamos introducido previamente mediante formulario
+     * @param [type] $datos Nuevos datos del usuario
+     * @return void Array  con el resultado, true o false, así como los errores en el último caso
+     */
     public function actuser($datos)
     {
         $resultado = [
@@ -245,7 +378,7 @@ class UserModel extends BaseModel
             "error" => null,
         ];
 
-        if ($this->comprobarRepeticion($datos, "existente")['existe'] == true) {
+        if ($this->comprobarRepeticion($datos, "existente")['existe'] == true) { //Comprobamos que no hemos introducidos valores ya existentes en otro usuario
             $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
         } else {
 
@@ -253,7 +386,7 @@ class UserModel extends BaseModel
                 //Inicializamos la transacción
                 $this->db->beginTransaction();
                 //Definimos la instrucción SQL parametrizada
-                $sql = "UPDATE usuario SET usu_nombre= :nombre, login = :login, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
+                $sql = "UPDATE $this->table SET usu_nombre= :nombre, login = :login, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
          direccion = :direccion, rol_id = :rol_id WHERE usuario_id=:id";
                 $query = $this->db->prepare($sql);
                 $query->execute([
@@ -284,7 +417,11 @@ class UserModel extends BaseModel
 
         return $resultado;
     }
-
+    /**
+     * Método que devuelve los datos de un usuario
+     * @param [type] $id Id del usuario a mostrar
+     * @return void Array con el resultado, incluyendo además los datos del usuario en caso existoso
+     */
     public function listausuario($id)
     {
         $resultado = [
@@ -293,9 +430,9 @@ class UserModel extends BaseModel
             "error" => null,
         ];
 
-        if ($id && is_numeric($id)) {
+        if ($id && is_numeric($id)) { //Comprobamos que hayamos introducido id y que sea numérica
             try {
-                $sql = "SELECT * FROM usuario WHERE usuario_id=:id";
+                $sql = "SELECT * FROM $this->table WHERE usuario_id=:id";
                 $query = $this->db->prepare($sql);
                 $query->execute(['id' => $id]);
                 //Supervisamos que la consulta se realizó correctamente...
@@ -308,13 +445,11 @@ class UserModel extends BaseModel
                 //die();
             }
         }
-
         return $resultado;
     }
 
     /**
-     * Undocumented function
-     *
+     * Método que sanea los valores introducidos en los formularios
      * @param [type] $valores Datos introducidos sin sanear
      * @return [array] $valores Datos saneados, elimiando carácteres especiales
      */
@@ -328,9 +463,8 @@ class UserModel extends BaseModel
     }
 
     /**
-     * función que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
+     * Método que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
      *  cumple con las restricciones establecidas de formato para estas
-     *
      * @param [type] $datos Array con los datos establecidos
      * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
@@ -355,7 +489,7 @@ class UserModel extends BaseModel
             $errores["apellido2"] = "No has introducido un segundo apellido válido!!<br>";
         }
 
-        if (!preg_match("/^[\S]+$/", $datos["login"])) {
+        if (!preg_match("/^[(\S|@)]+$/", $datos["login"])) {
             $errores["usuario"] = "No has introducido un nombre de usuario válido!!<br>";
         }
 
@@ -376,12 +510,10 @@ class UserModel extends BaseModel
         }
 
         return $errores;
-
     }
 
     /**
-     * Función que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
-     *
+     * Método que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
      * @param [type] $datosUsu datos del usuario a introducir
      * @param [type] $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
      * @return void Array con el resultado de la consulta y un error, en caso de que se provocase
@@ -396,13 +528,12 @@ class UserModel extends BaseModel
 
         try {
 
-            if ($modo == "nuevo") {
-                $sql = "SELECT * from usuario where (nif = :nif) OR (login = :login) or (email = :email)";
+            if ($modo == "nuevo") { //Si el usuario es nuevo, busca por toda la tabla
+                $sql = "SELECT * from $this->table where (nif = :nif) OR (login = :login) or (email = :email)";
                 $resultquery = $this->db->prepare($sql);
                 $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email']]);
-
-            } else {
-                $sql = "SELECT * from usuario where ((nif = :nif) OR (login = :login) or (email = :email)) AND (usuario_id <> :id)";
+            } else { //Si estamos actualizando, busca por toda la tabla, a excepción del usuario que estamos actualizando
+                $sql = "SELECT * from $this->table where ((nif = :nif) OR (login = :login) or (email = :email)) AND (usuario_id <> :id)";
                 $resultquery = $this->db->prepare($sql);
                 $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email'], 'usuario_id' => $datosUsu['id']]);
             }
@@ -414,6 +545,5 @@ class UserModel extends BaseModel
             $resultado["error"] = $ex->getMessage();
         }
         return $resultado;
-
     }
 }

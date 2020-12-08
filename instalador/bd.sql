@@ -15,9 +15,16 @@ CREATE  OR REPLACE TABLE actividad (
    UNIQUE(act_nombre)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Fitness',20,'No se lo que se hace aquí jaja saludos');
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Body Combat',15,'Tampoco sé lo que se hace aquí');
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Yoga',30,'Mi personaje de star wars favorito');
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Pilates',23,'Para estar mamadisimo, mentira, tampoco sé lo que se hace');
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Hora libre',19,'No se me ocurren más actividades');
+INSERT INTO actividad (actividad_id, act_nombre, aforo, descripcion) VALUES (NULL, 'Religion',10,'Un 10 gratis pa la nota');
+
 CREATE OR REPLACE TABLE tramo (
    tramo_id int(11) NOT NULL AUTO_INCREMENT,
-   dia varchar(9) NOT NULL,
+   dia int(1) NOT NULL,
    hora_inicio time NOT NULL,
    hora_fin time NOT NULL,
    actividad_id int(11) NOT NULL,
@@ -27,9 +34,23 @@ CREATE OR REPLACE TABLE tramo (
     PRIMARY KEY(tramo_id)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 1, '14:15:00','14:45:00',11,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 2, '12:45:00','13:00:00',7,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 2, '18:00:00','18:30:00',12,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '09:15:00','10:00:00',8,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '17:00:00','17:30:00',10,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '19:30:00','20:15:00',12,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 4, '09:15:00','10:00:00',8,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 4, '12:30:00','13:00:00',9,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 5, '08:30:00','09:15:00',11,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 5, '20:30:00','21:15:00',7,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 6, '13:30:00','14:00:00',10,CURDATE());
+ INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 6, '21:15:00','22:00:00',7,CURDATE());
+
+
 CREATE OR REPLACE TABLE usuario (
   usuario_id int(11) NOT NULL AUTO_INCREMENT,
-  nif varchar(10) NOT NULL,
+  nif varchar(10),
   usu_nombre varchar(50) NOT NULL,
    apellido1 varchar(30) NOT NULL,
    apellido2 varchar(30) NOT NULL,
@@ -41,30 +62,48 @@ CREATE OR REPLACE TABLE usuario (
   direccion varchar(50) NOT NULL,
   rol_id int(11) NOT NULL,
   estado int(1) NOT NULL,
+  autentificacion varchar(10) DEFAULT 'nada' COLLATE utf8_unicode_ci,
+  idGoogle varchar(255) COLLATE utf8_unicode_ci DEFAULT '',
  FOREIGN KEY (rol_id) REFERENCES rol(rol_id),
   PRIMARY KEY(usuario_id),
   UNIQUE(nif),
   UNIQUE(login),
   UNIQUE(email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci;
 
 INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
  telefono, DIRECCION, rol_id, estado) VALUES (NULL, '12345678T', 'Manolo', 'Ortega', 'Cano', NULL, 'Patata',
-  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@manolo.com', 911223344, 'calle paco', 1, 1);
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@hotmail.com', 911223344, 'calle paco', 1, 1);
 
   INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
  telefono, DIRECCION, rol_id, estado) VALUES (NULL, '98765432P', 'Paca', 'Perez', 'Olga', NULL, 'Zanahoria',
-  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@paca.com', 111223344, 'calle doro', 2, 1);
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'patata@gmail.com', 811223344, 'calle dora', 2, 1);
 
 INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
- telefono, DIRECCION, rol_id, estado) VALUES (NULL, '44556677P', 'Lola', 'Ostia', 'Calvo', NULL, 'Coco',
-  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'lola@paca.com', 666555444, 'calle mano', 2, 2);
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '44556677P', 'Lola', 'Rodriguez', 'Calvo', NULL, 'Coco',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'lola@hotmail.com', 666555444, 'calle mano', 2, 2);
+
+  INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '12345234K', 'Manoli', 'paca', 'Palo', NULL, 'Silla',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'silla@gmail.com', 914223344, 'calle loli', 1, 1);
+
+  INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '66644412C', 'Javier', 'Caco', 'Martin', NULL, 'Pera',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'murcielago@gmail.es', 915623344, 'calle paco', 2, 1);
+
+INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '44856573P', 'gabri', 'garcia', 'mendez', NULL, 'Manzana',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'lola@gmail.es', 668555444, 'calle lolo', 2, 1);
+
+INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
+ telefono, DIRECCION, rol_id, estado) VALUES (NULL, '85156677F', 'marco', 'heidi', 'barranco', NULL, 'Kiwi',
+  '556f2f3abcac9f1caa6be0a62ed41ec5d7b43e48', 'rodolfo@gmail.com', 668555879, 'calle abril', 2, 2);
 
 CREATE OR REPLACE TABLE tramo_usuario (
    tramo_usu_id int(11) NOT NULL AUTO_INCREMENT,
    tramo_id int(11) NOT NULL,
    usuario_id int(11) NOT NULL,
-   fecha_act varchar(9) NOT NULL,
+   fecha_act date NOT NULL,
    fecha_reserva date NOT NULL,
    PRIMARY KEY(tramo_usu_id),
   FOREIGN KEY(tramo_id) REFERENCES tramo(tramo_id),
@@ -74,6 +113,7 @@ CREATE OR REPLACE TABLE tramo_usuario (
  CREATE OR REPLACE TABLE mensaje (
    mensaje_id int(11) NOT NULL AUTO_INCREMENT,
    usu_origen int(11) NOT NULL,
+   asunto varchar(30) NOT NULL,
    usu_destino int(11) NOT NULL,
    mensaje varchar(100) NOT NULL,
    PRIMARY KEY(mensaje_id),
@@ -81,7 +121,7 @@ CREATE OR REPLACE TABLE tramo_usuario (
    FOREIGN KEY(usu_destino) REFERENCES usuario(usuario_id)
  )
 
- INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje) VALUES (NULL, 1, 2, '!Bienvenido a nuestro gimnasio!');
+ INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 1, 2, '!Bienvenido a nuestro gimnasio!', 'Bienvenido!');
 
 COMMIT;
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DBManager implementa el patron Singleton para mantener una única instancia de PDO
  */
@@ -6,13 +7,11 @@ class DBManager
 {
    /**
     * Contenedor de la instancia de la Clase
-    *
     * @var DBManager
     */
    private static $instance;
    /**
     * Manejador de la base de datos
-    *
     * @var PDO
     */
    private $db;
@@ -21,7 +20,6 @@ class DBManager
    }
    /**
     * Garantiza que se crea una sóla instancia de Config
-    *
     * @return DBManager
     */
    public static function getInstance()
@@ -33,8 +31,7 @@ class DBManager
    }
    /**
     * Se conecta a la base de datos con los valores de configuración de la app
-    *
-    * @return PDO
+    * @return PDO Obtejo que usaremos para conectarnos a la bd
     */
    public function getConnection()
    {
