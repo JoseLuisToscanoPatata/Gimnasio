@@ -17,25 +17,24 @@
       <div class="text-xs-center bajar" id="cuerpoPrincipal">
          <div class="container">
 
-            <?= $modo ?>
             <?php if ($modo == "IN") { ?>
                <h1 class="display-5 wow bounce font-weight-bold">BANDEJA DE ENTRADA</h1>
             <?php } else { ?>
                <h1 class="display-5 wow bounce font-weight-bold">BANDEJA DE SALIDA</h1>
             <?php } ?>
-            <div class="btn-group" id="paginasMensEntrada">
+            <div id="paginasMensajes" class="btn-group">
                <a class="btn " href="#"><i class="fa fa-user"></i> Registros por página:</a>
                <a class="btn  dropdown-toggle" data-toggle="dropdown" href="#">
                   </span></a>
                <ul class="dropdown-menu">
-                  <li><a href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&regsxpag=3&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"></i> 3</a></li>
-                  <li><a href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&regsxpag=5&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"> </i> 5</a></li>
-                  <li><a href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&regsxpag=7&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"></i> 7</a></li>
+                  <li><a href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&regsxpag=3&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"></i> 3</a></li>
+                  <li><a href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&regsxpag=5&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"> </i> 5</a></li>
+                  <li><a href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&regsxpag=7&orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> <i class="fa fa-th"></i> 7</a></li>
                </ul>
             </div>
 
             <!--Creamos la tabla que utilizaremos para el listado:-->
-            <table class="table" style="color: white;" id="bandejaEntrada">
+            <table class="table" style="color: white;" id="mensajes">
 
                <tr>
                   <td><input type="text" placeholder="Usuario.." onkeyup="filtrarTabla('fillUsuario', 'mensajes',0)" id="fillUsuario"></td>
@@ -43,17 +42,17 @@
                   <td style="display: none;"></td>
                </tr>
                <tr>
-                  <th class="bg-primary" style="width: 50px;"> <a href="index.php?controller=home&accion=listadotipo=<?= $modo ?>&regsxpag=<?= $paginacion['regsxpag'] ?>&orden=<?php if ($paginacion['columna'] == 'login' && $paginacion['orden'] == 'desc') {
-                                                                                                                                                                                    echo 'asc';
-                                                                                                                                                                                 } else {
-                                                                                                                                                                                    echo 'desc';
-                                                                                                                                                                                 } ?><?= '&columna=login' ?>">Id</a> </th>
-
-                  <th class="bg-info" style="width: 153px;"> <a href="index.php?controller=home&accion=listadotipo=<?= $modo ?>&regsxpag=<?= $paginacion['regsxpag'] ?>&orden=<?php if ($paginacion['columna'] == 'asunto' && $paginacion['orden'] == 'desc') {
+                  <th class="bg-primary" style="width: 50px;"> <a href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&regsxpag=<?= $paginacion['regsxpag'] ?>&orden=<?php if ($paginacion['columna'] == 'login' && $paginacion['orden'] == 'desc') {
                                                                                                                                                                                  echo 'asc';
                                                                                                                                                                               } else {
                                                                                                                                                                                  echo 'desc';
-                                                                                                                                                                              } ?><?= '&columna=asunto' ?>">Nombre</a></th>
+                                                                                                                                                                              } ?><?= '&columna=login' ?>">Receptor</a> </th>
+
+                  <th class="bg-info" style="width: 100px;"> <a href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&regsxpag=<?= $paginacion['regsxpag'] ?>&orden=<?php if ($paginacion['columna'] == 'asunto' && $paginacion['orden'] == 'desc') {
+                                                                                                                                                                              echo 'asc';
+                                                                                                                                                                           } else {
+                                                                                                                                                                              echo 'desc';
+                                                                                                                                                                           } ?><?= '&columna=asunto' ?>">Asunto</a></th>
 
                   <th style="background-color: #cd5afa; width: 100px;">Operaciones</th>
                </tr>
@@ -61,14 +60,14 @@
                <?php foreach ($datos as $d) : ?>
                   <!--Mostramos cada registro en una fila de la tabla-->
                   <tr>
-                     <td class="bg-primary"><?= $d["login"] ?></td>
+                     <td class="bg-primary"><?= $d["persona"] ?></td>
                      <td class="bg-info"><?= $d["asunto"] ?></td>
                      <td style="background-color: #cd5afa;" id="iconosTabla">
-                        <a href=" ?controller=home&accion=seeMessage&id=<?= $d['mensaje_id'] ?>">
+                        <a href=" ?controller=home&accion=seemessage&id=<?= $d['mensaje_id'] ?>">
                            <img src="assets/images/edit.svg" alt="mirar Mensaje">
                         </a>
                         <?php if ($modo = "IN") { ?>
-                           <a href="?controller=home&accion=delMessage&id=<?= $d['mensaje_id'] ?>">
+                           <a href="?controller=home&accion=delmessage&id=<?= $d['mensaje_id'] ?>">
                               <img src="assets/images/delete.svg" alt="eliminar Mensaje">
                            </a>
                         <?php } ?>
@@ -87,10 +86,10 @@
                      <li class="page-item disabled"><a class="page-link" href="#">&laquo;&laquo;</a></li>
                      <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
                   <?php else : ?>
-                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&pagina=1&regsxpag=<?= $paginacion['regsxpag'] ?>
+                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&pagina=1&regsxpag=<?= $paginacion['regsxpag'] ?>
                         &orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> &laquo; &laquo;</a></li>
 
-                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&pagina=<?= $paginacion['pagina'] - 1 ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
+                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&pagina=<?= $paginacion['pagina'] - 1 ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
                         &orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> &laquo; </a></li>
                   <?php endif; ?>
 
@@ -98,10 +97,10 @@
 
                   <?php
                   if ($paginacion['pagina'] != $paginacion['numpaginas']) { ?>
-                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&pagina=<?php echo $paginacion['pagina'] + 1; ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
+                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&pagina=<?php echo $paginacion['pagina'] + 1; ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
                         &orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> &raquo; </a></li>
 
-                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&tipo=<?= $modo ?>&pagina=<?php echo $paginacion['numpaginas']; ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
+                     <li class="page-item"><a class="page-link" href="index.php?controller=home&accion=listado&modo=<?= $modo ?>&pagina=<?php echo $paginacion['numpaginas']; ?>&regsxpag=<?= $paginacion['regsxpag'] ?>
                         &orden=<?= $paginacion['orden'] ?>&columna=<?= $paginacion['columna'] ?>"> &raquo;&raquo; </a></li>
                   <?php } else { ?>
 

@@ -34,20 +34,6 @@ CREATE OR REPLACE TABLE tramo (
     PRIMARY KEY(tramo_id)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 1, '14:15:00','14:45:00',11,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 2, '12:45:00','13:00:00',7,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 2, '18:00:00','18:30:00',12,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '09:15:00','10:00:00',8,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '17:00:00','17:30:00',10,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 3, '19:30:00','20:15:00',12,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 4, '09:15:00','10:00:00',8,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 4, '12:30:00','13:00:00',9,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 5, '08:30:00','09:15:00',11,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 5, '20:30:00','21:15:00',7,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 6, '13:30:00','14:00:00',10,CURDATE());
- INSERT INTO tramo (tramo_id, dia, hora_inicio, hora_fin, actividad_id, fecha_alta) values (NULL, 6, '21:15:00','22:00:00',7,CURDATE());
-
-
 CREATE OR REPLACE TABLE usuario (
   usuario_id int(11) NOT NULL AUTO_INCREMENT,
   nif varchar(10),
@@ -62,14 +48,14 @@ CREATE OR REPLACE TABLE usuario (
   direccion varchar(50) NOT NULL,
   rol_id int(11) NOT NULL,
   estado int(1) NOT NULL,
-  autentificacion varchar(10) DEFAULT 'nada' COLLATE utf8_unicode_ci,
-  idGoogle varchar(255) COLLATE utf8_unicode_ci DEFAULT '',
+  autentificacion varchar(10) DEFAULT 'nada',
+  idGoogle varchar(255) default 'nada',
  FOREIGN KEY (rol_id) REFERENCES rol(rol_id),
   PRIMARY KEY(usuario_id),
   UNIQUE(nif),
   UNIQUE(login),
   UNIQUE(email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO usuario (usuario_id, nif, usu_nombre, apellido1, apellido2, imagen, login, password, email,
  telefono, DIRECCION, rol_id, estado) VALUES (NULL, '12345678T', 'Manolo', 'Ortega', 'Cano', NULL, 'Patata',

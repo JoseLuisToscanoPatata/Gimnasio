@@ -44,7 +44,7 @@ class MessageModel extends BaseModel
      * Función que realiza el listado de todos los usuarios registrados
      * @return type Devuelve el array con los parámetros
      */
-    public function listado()
+    public function listado($modo)
     {
         /**
          *  -'correcto': indica si el listado se realizó correctamente o no.
@@ -60,9 +60,9 @@ class MessageModel extends BaseModel
             "paginacion" => [],
         ];
 
-        $orden = (isset($_GET['orden'])) ?  $_GET['orden'] : 'asc';
+        $orden = (isset($_GET['orden'])) ? $_GET['orden'] : 'asc';
 
-        $columna = (isset($_GET['columna'])) ?  $_GET['columna'] : 'usuario_id';
+        $columna = (isset($_GET['columna'])) ? $_GET['columna'] : 'login';
 
         //Establecemos el número de registros a mostrar por página,por defecto 2
         $regsxpag = (isset($_GET['regsxpag'])) ? (int) $_GET['regsxpag'] : 3;
@@ -79,17 +79,33 @@ class MessageModel extends BaseModel
         $offset = ($pagina > 1) ? (($pagina - 1) * $regsxpag) : 0;
 
         //Calculamos el número de registros obtenidos
-        $totalregistros = $this->db->query("SELECT count(*) as total FROM usuario");
-        $totalregistros = $totalregistros->fetch()['total'];
+        if ($modo == 'IN') {
+            $sql = "SELECT count(*) as total FROM $this->table2 where $this->table2.usu_origen = :usuario";
+        } else {
+            $sql = "SELECT count(*) as total FROM $this->table2 where $this->table2.usu_destino = :usuario";
+        }
+
+        $query = $this->db->prepare($sql);
+        $query->execute(["usuario" => $_SESSION['id']]);
+        $totalregistros = $query->fetch()['total'];
 
         $resultado['paginacion']['numpaginas'] = ceil($totalregistros / $regsxpag);
 
         //Realizamos la consulta...
         try { //Definimos la instrucción SQL
-            $sql = "SELECT * FROM $this->table order by $columna $orden LIMIT $regsxpag OFFSET $offset";
+
+            if ($modo == "IN") {
+                $sql = "SELECT $this->table.login AS persona, $this->table2.mensaje_id,   $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
+                $this->table2 ON   $this->table2.usu_origen = $this->table.usuario_id where   $this->table2.usu_origen = :usuario
+                order by $columna $orden LIMIT $regsxpag OFFSET $offset";
+            } else {
+                $sql = "SELECT $this->table.login AS persona,  $this->table2.mensaje_id, $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
+                $this->table2 ON   $this->table2.usu_origen = $this->table.usuario_id where   $this->table2.usu_destino = :usuario
+                order by $columna $orden LIMIT $regsxpag OFFSET $offset";
+            }
             // Hacemos directamente la consulta al no tener parámetros
             $resultsquery = $this->db->prepare($sql);
-            $resultsquery->execute();
+            $resultsquery->execute(["usuario" => $_SESSION['id']]);
             //Supervisamos si la inserción se realizó correctamente...
             if ($resultsquery) :
                 $resultado["correcto"] = true;
@@ -103,11 +119,11 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que elimina el usuario cuyo id es el que se le pasa como parámetro
+     * Método que elimina el mensaje cuyo id es el que se le pasa como parámetro
      * @param $id es un valor numérico. Es el campo clave de la tabla
      * @return boolean Array con el resultado, true o false, y con los errores en el último caso
      */
-    public function deluser($id)
+    public function delmessage($id)
     {
         // La función devuelve un array con dos valores:'correcto', que indica si la
         // operación se realizó correctamente, y 'mensaje', campo a través del cual le
@@ -122,7 +138,7 @@ class MessageModel extends BaseModel
                 //Inicializamos la transacción
                 $this->db->beginTransaction();
                 //Definimos la instrucción SQL parametrizada
-                $sql = "DELETE FROM $this->table WHERE usuario_id=:id";
+                $sql = "DELETE FROM $this->table2 WHERE mensaje_id=:id";
                 $query = $this->db->prepare($sql);
                 $query->execute(['id' => $id]);
                 //Supervisamos si la eliminación se realizó correctamente...
@@ -146,7 +162,7 @@ class MessageModel extends BaseModel
      * @param type $datos Datos del usuario a crear
      * @return type Array con el resultado, true o false, y con los errores en el último caso
      */
-    public function adduser($datos)
+    public function addmessage($datos)
     {
         $resultado = [
             "correcto" => false,
@@ -195,62 +211,11 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que actualiza un elemento de la tabla usuario, con los datos que hayamos introducido previamente mediante formulario
-     * @param [type] $datos Nuevos datos del usuario
-     * @return void Array  con el resultado, true o false, así como los errores en el último caso
-     */
-    public function actuser($datos)
-    {
-        $resultado = [
-            "correcto" => false,
-            "error" => null,
-        ];
-
-        if ($this->comprobarRepeticion($datos, "existente")['existe'] == true) { //Comprobamos que no hemos introducidos valores ya existentes en otro usuario
-            $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
-        } else {
-
-            try {
-                //Inicializamos la transacción
-                $this->db->beginTransaction();
-                //Definimos la instrucción SQL parametrizada
-                $sql = "UPDATE $this->table SET usu_nombre= :nombre, login = :login, password = :password, nif= :nif, apellido1= :apellido1, apellido2 = :apellido2, email= :email, imagen= :imagen, telefono = :telefono,
-         direccion = :direccion, rol_id = :rol_id WHERE usuario_id=:id";
-                $query = $this->db->prepare($sql);
-                $query->execute([
-                    'id' => $datos["id"],
-                    'nif' => $datos["nif"],
-                    'password' => sha1($datos["password"]),
-                    'login' => $datos['login'],
-                    'nombre' => $datos["nombre"],
-                    'email' => $datos["email"],
-                    'imagen' => $datos["imagen"],
-                    'apellido1' => $datos["apellido1"],
-                    'apellido2' => $datos["apellido2"],
-                    'telefono' => $datos["telefono"],
-                    'direccion' => $datos["direccion"],
-                    'rol_id' => $datos["rol_id"],
-                ]);
-                //Supervisamos si la inserción se realizó correctamente...
-                if ($query) {
-                    $this->db->commit(); // commit() confirma los cambios realizados durante la transacción
-                    $resultado["correcto"] = true;
-                } // o no :(
-            } catch (PDOException $ex) {
-                $this->db->rollback(); // rollback() se revierten los cambios realizados durante la transacción
-                $resultado["error"] = $ex->getMessage();
-                //die();
-            }
-        }
-
-        return $resultado;
-    }
-    /**
      * Método que devuelve los datos de un usuario
      * @param [type] $id Id del usuario a mostrar
      * @return void Array con el resultado, incluyendo además los datos del usuario en caso existoso
      */
-    public function listausuario($id)
+    public function listamensaje($id)
     {
         $resultado = [
             "correcto" => false,
@@ -277,22 +242,8 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que sanea los valores introducidos en los formularios
-     * @param [type] $valores Datos introducidos sin sanear
-     * @return [array] $valores Datos saneados, elimiando carácteres especiales
-     */
-    public function sanearValores($valores)
-    {
-        array_walk_recursive($valores, function (&$valor) {
-            $valor = trim(filter_var($valor, FILTER_SANITIZE_STRING));
-        });
-
-        return $valores;
-    }
-
-    /**
-     * Método que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
-     *  cumple con las restricciones establecidas de formato para estas
+     * Método que me comprueba si los valores introducidos en los campos de un mensaje
+     *  no están vacíos o únicamente llenos de espacios
      * @param [type] $datos Array con los datos establecidos
      * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
@@ -301,77 +252,18 @@ class MessageModel extends BaseModel
 
         $errores = array();
 
-        if (!preg_match("/^[0-9]{8}(?![OUILÑ])[a-zA-Z]$/", $datos["nif"])) {
-            $errores["DNI"] = "No has introducido un DNI válido!!<br>";
+        if (preg_match("/^\s*$/", $datos["receptor"])) {
+            $errores["descripcion"] = "No puedes introducir un receptor vacío!!<br>";
         }
 
-        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+(\s[a-zA-ZáÁéÉíÍóÓúÚ]+)*$/", $datos["nombre"])) {
-            $errores["nombre"] = "No has introducido un nombre válido!!<br>";
+        if (preg_match("/^\s*$/", $datos["asunto"])) {
+            $errores["descripcion"] = "No puedes introducir un asunto vacío!!<br>";
         }
 
-        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+$/", $datos["apellido1"])) {
-            $errores["apellido1"] = "No has introducido un primer apellido válido!!<br>";
-        }
-
-        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+$/", $datos["apellido2"])) {
-            $errores["apellido2"] = "No has introducido un segundo apellido válido!!<br>";
-        }
-
-        if (!preg_match("/^[(\S|@)]+$/", $datos["login"])) {
-            $errores["usuario"] = "No has introducido un nombre de usuario válido!!<br>";
-        }
-
-        if (!preg_match("/^\w+([\.-_]?w+)*@\w+(\.(com|es|net|org|yahoo))+$/", $datos["email"])) {
-            $errores["email"] = "No has introducido una dirección de correo válida!!<br>";
-        }
-
-        if (!preg_match("/^(?=.*[0-9])(?=.*[!@#$%^&*-])(?=.*[A-Z]).{8,}$/", $datos["password"])) {
-            $errores["password"] = "No has introducido una contraseña válida!!<br>";
-        }
-
-        if (!preg_match("/^[a-zA-ZáÁéÉíÍóÓúÚ]+(\s[a-zA-ZáÁéÉíÍóÓúÚ0-9]+)*$/", $datos["direccion"])) {
-            $errores["direccion"] = "No has introducido una dirección válida!!<br>";
-        }
-
-        if (!preg_match("/^[986][0-9]{8}$/", $datos["telefono"])) {
-            $errores["telefono"] = "No has introducido un telefono válido!!<br>";
+        if (preg_match("/^\s*$/", $datos["mensaje"])) {
+            $errores["descripcion"] = "No puedes introducir un mensaje vacío!!<br>";
         }
 
         return $errores;
-    }
-
-    /**
-     * Método que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
-     * @param [type] $datosUsu datos del usuario a introducir
-     * @param [type] $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
-     * @return void Array con el resultado de la consulta y un error, en caso de que se provocase
-     */
-    public function comprobarRepeticion($datosUsu, $modo)
-    {
-
-        $resultado = [
-            "existe" => false,
-            "error" => null,
-        ];
-
-        try {
-
-            if ($modo == "nuevo") { //Si el usuario es nuevo, busca por toda la tabla
-                $sql = "SELECT * from $this->table where (nif = :nif) OR (login = :login) or (email = :email)";
-                $resultquery = $this->db->prepare($sql);
-                $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email']]);
-            } else { //Si estamos actualizando, busca por toda la tabla, a excepción del usuario que estamos actualizando
-                $sql = "SELECT * from $this->table where ((nif = :nif) OR (login = :login) or (email = :email)) AND (usuario_id <> :id)";
-                $resultquery = $this->db->prepare($sql);
-                $resultquery->execute(['nif' => $datosUsu['nif'], 'login' => $datosUsu['login'], 'email' => $datosUsu['email'], 'usuario_id' => $datosUsu['id']]);
-            }
-
-            if ($resultquery->rowCount() > 0) {
-                $resultado["existe"] = true;
-            }
-        } catch (PDOException $ex) { //Si pasa por aquí, correcto seguirá siendo 0, que significará que ha petado
-            $resultado["error"] = $ex->getMessage();
-        }
-        return $resultado;
     }
 }

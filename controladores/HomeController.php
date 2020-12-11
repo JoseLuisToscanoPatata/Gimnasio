@@ -33,6 +33,8 @@ class HomeController extends BaseController
         parent::__construct();
         $this->modeloUser = new UserModel();
         $this->modeloMens = new MessageModel();
+        $this->mensajes = [];
+
     }
 
     /**
@@ -50,7 +52,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Método que obtiene de la base de datos el listado de usuarios y envía dicha
+     * Método que obtiene de la base de datos el listado de mensajes y envía dicha
      * infomación a la vista correspondiente para su visualización
      */
     public function listado()
@@ -58,11 +60,11 @@ class HomeController extends BaseController
         require_once CHECK_SESSION_FILE;
         // Almacenamos en el array 'parametros[]'los valores que vamos a mostrar en la vista
         $parametros = [
-            "tituloventana" => "Lista de usuarios",
+            "tituloventana" => "Lista de mensajes",
             "datos" => null,
             "mensajes" => [],
             "paginacion" => [],
-            "modo" => $_GET['modo'],
+            "modo" => $_GET['modo'], //Variable que indicará si queremos mostrar la bandeja de entrada o de salida
         ];
 
         // Realizamos la consulta y almacenamos los resultados en la variable $resultModelo
@@ -70,12 +72,12 @@ class HomeController extends BaseController
         // Si la consulta se realizó correctamente transferimos los datos obtenidos
         // de la consulta del modelo ($resultModelo["datos"]) a nuestro array parámetros
         // ($parametros["datos"]), que será el que le pasaremos a la vista para visualizarlos
-        if ($resultModelo["correcto"]) :
+        if ($resultModelo["correcto"]):
             $parametros["datos"] = $resultModelo["datos"];
             $parametros["paginacion"] = $resultModelo["paginacion"]; //También obtenemos los datos necesarios para la paginación
-        //Definimos el mensaje para el alert de la vista de que todo fue correctamente
+            //Definimos el mensaje para el alert de la vista de que todo fue correctamente
 
-        else :
+        else:
             //Definimos el mensaje para el alert de la vista de que se produjeron errores al realizar el listado
             $this->mensajes[] = [
                 "tipo" => "danger",
@@ -86,11 +88,11 @@ class HomeController extends BaseController
         //'mensaje', que recoge cómo finalizó la operación:
         $parametros["mensajes"] = $this->mensajes;
         // Incluimos la vista en la que visualizaremos los datos o un mensaje de error
-        $this->view->show("ListadoUser", $parametros);
+        $this->view->show("ListadoMessage", $parametros);
     }
 
     /**
-     * Metodo que elimina un usuario seleccionado de la tabla de usuarios, proveniendo su id
+     * Metodo que elimina un mensaje seleccionado de la tabla de mensaje, proveniendo su id
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function delmessage()
@@ -100,32 +102,32 @@ class HomeController extends BaseController
         // verificamos que hemos recibido los parámetros desde la vista de listado
         if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
             $id = $_GET["id"];
-            //Realizamos la operación de suprimir el usuario con el id=$id
-            $resultModelo = $this->modelo->deluser($id);
+            //Realizamos la operación de suprimir el mensaje con el id=$id
+            $resultModelo = $this->modeloMens->delMens($id);
             //Analizamos el valor devuelto por el modelo para definir el mensaje a
             //mostrar en la vista listado
-            if ($resultModelo["correcto"]) :
+            if ($resultModelo["correcto"]):
                 $this->mensajes[] = [
                     "tipo" => "success",
-                    "mensaje" => "Se eliminó correctamente el usuario $id",
+                    "mensaje" => "Se eliminó correctamente el mensaje!!",
                 ];
-            else : //Si ha habido errores en el proceso de borrado del usuario
+            else: //Si ha habido errores en el proceso de borrado del mensaje
                 $this->mensajes[] = [
                     "tipo" => "danger",
-                    "mensaje" => "La eliminación del usuario no se realizó correctamente!! :( <br/>({$resultModelo["error"]})",
+                    "mensaje" => "La eliminación del mensaje no se realizó correctamente!! :( <br/>({$resultModelo["error"]})",
                 ];
             endif;
         } else { //Si no recibimos el valor del parámetro $id generamos el mensaje indicativo:
             $this->mensajes[] = [
                 "tipo" => "danger",
-                "mensaje" => "No se pudo acceder al id del usuario a eliminar!! :(",
+                "mensaje" => "No se pudo acceder al id del mensaje a eliminar!! :(",
             ];
         }
-        //Realizamos el listado de los usuarios
+        //Realizamos el listado de los mensajes
         $this->listado();
     }
     /**
-     * Metodo que añade un usuario nuevo, cuyas propiedades indicamos por formulario
+     * Metodo que añade un mensaje nuevo, cuyas propiedades indicamos por formulario
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function addmessage()
@@ -137,30 +139,18 @@ class HomeController extends BaseController
         // Si se ha pulsado el botón guardar...
         if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) { // y hemos recibido las variables del formulario y éstas no están vacías...
 
-            $nif = $_POST['txtnif']; //Guardamos todos los valores obtenidos
-            $nombre = $_POST['txtnombre'];
-            $apellido1 = $_POST['txtapellido1'];
-            $apellido2 = $_POST['txtapellido2'];
-            $login = $_POST['txtlogin'];
-            $email = $_POST['txtemail'];
-            $password = $_POST['txtpass'];
-            $telefono = $_POST['txttelefono'];
-            $direccion = $_POST['txtdireccion'];
-            $rol_id = $_POST['rol_id'];
+            $receptor = $_POST['txtlogin']; //Guardamos todos los valores obtenidos
+            $asunto = $_POST['txtasunto'];
+            $mensaje = $_POST['txtmensaje'];
+            $enviador = $_POST['id'];
 
-            $datosSaneados = $this->modelo->sanearValores([ //Saneamos dichos valores
-                'nif' => $nif,
-                'nombre' => $nombre,
-                'apellido1' => $apellido1,
-                'apellido2' => $apellido2,
-                'login' => $login,
-                "password" => $password,
-                'email' => $email,
-                'telefono' => $telefono,
-                'direccion' => $direccion,
+            $datosSaneados = $this->modeloUser->sanearValores([ //Saneamos dichos valores
+                'receptor' => $receptor,
+                'asunto' => $asunto,
+                'mensaje' => $mensaje,
             ]);
 
-            $errores = $this->modelo->comprobarRestricciones($datosSaneados); //Obtenemos los posibles errores del saneamiento
+            $errores = $this->modeloUser->comprobarRestricciones($datosSaneados); //Obtenemos los posibles errores del saneamiento
             //Para decidir si seguir o no con la operación
 
             /* Realizamos la carga de la imagen en el servidor */
@@ -196,7 +186,7 @@ class HomeController extends BaseController
                     }
                 }
             }
-            // Si no se han producido errores realizamos el registro del usuario
+            // Si no se han producido errores realizamos el registro del mensaje
             if (count($errores) == 0) {
                 $resultModelo = $this->modelo->adduser([
                     'nif' => $datosSaneados['nif'],
@@ -212,15 +202,15 @@ class HomeController extends BaseController
                     'rol_id' => $rol_id,
 
                 ]);
-                if ($resultModelo["correcto"]) :
+                if ($resultModelo["correcto"]):
                     $this->mensajes[] = [
                         "tipo" => "success",
-                        "mensaje" => "El usuarios se registró correctamente!! :)",
+                        "mensaje" => "El mensajes se registró correctamente!! :)",
                     ];
-                else : //Si hemos obtenido errores en el proceso de adición del usuario a la tabla..
+                else: //Si hemos obtenido errores en el proceso de adición del mensaje a la tabla..
                     $this->mensajes[] = [
                         "tipo" => "danger",
-                        "mensaje" => "El usuario no pudo registrarse!! :( <br />({$resultModelo["error"]})",
+                        "mensaje" => "El mensaje no pudo registrarse!! :( <br />({$resultModelo["error"]})",
                     ];
                 endif;
             } else {
@@ -236,7 +226,7 @@ class HomeController extends BaseController
         //De lo contrario tendremos los campos llenos con los valores introducidos
 
         $parametros = [
-            "tituloventana" => "Creación de usuario",
+            "tituloventana" => "Creación de mensaje",
             "datos" => [
                 "txtnif" => isset($datosSaneados['nif']) ? $datosSaneados['nif'] : "",
                 "txtnombre" => isset($datosSaneados['nombre']) ? $datosSaneados['nombre'] : "",
@@ -252,13 +242,12 @@ class HomeController extends BaseController
             ],
             "mensajes" => $this->mensajes,
         ];
-        //Visualizamos la vista asociada al registro de usuarios
-        $this->view->show("AddUser", $parametros);
+        //Visualizamos la vista asociada al registro de mensajes
+        $this->view->show("AddMessage", $parametros);
     }
 
-
     /**
-     * Método que permite nos permite actualizar los datos de un usuario elegido, cuya id coincide con la que
+     * Método que permite nos permite actualizar los datos de un mensaje elegido, cuya id coincide con la que
      * se pasa como parámetro desde la vista del listado, a través de GET
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
@@ -331,7 +320,7 @@ class HomeController extends BaseController
                     // Verficamos que la carga se ha realizado correctamente
                     if (!$movfichimg) {
                         //Si no pudo moverse a la carpeta destino generamos un mensaje que se le
-                        //mostrará al usuario en la vista actuser
+                        //mostrará al mensaje en la vista actuser
                         $errores["imagen"] = "Error: La imagen no se cargó correctamente! :(";
                         $this->mensajes[] = [
                             "tipo" => "danger",
@@ -360,15 +349,15 @@ class HomeController extends BaseController
                 ]);
                 //Analizamos cómo finalizó la operación de registro y generamos un mensaje
                 //indicativo del estado correspondiente
-                if ($resultModelo["correcto"]) :
+                if ($resultModelo["correcto"]):
                     $this->mensajes[] = [
                         "tipo" => "success",
-                        "mensaje" => "El usuario se actualizó correctamente!! :)",
+                        "mensaje" => "El mensaje se actualizó correctamente!! :)",
                     ];
-                else :
+                else:
                     $this->mensajes[] = [
                         "tipo" => "danger",
-                        "mensaje" => "El usuario no pudo actualizarse!! :( <br/>({$resultModelo["error"]})",
+                        "mensaje" => "El mensaje no pudo actualizarse!! :( <br/>({$resultModelo["error"]})",
                     ];
                 endif;
             } else {
@@ -395,14 +384,14 @@ class HomeController extends BaseController
         } else { //Estamos rellenando los campos con los valores recibidos del listado
             if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
                 $id = $_GET['id'];
-                //Ejecutamos la consulta para obtener los datos del usuario #id
+                //Ejecutamos la consulta para obtener los datos del mensaje #id
                 $resultModelo = $this->modelo->listausuario($id);
                 //Analizamos si la consulta se realiz´correctamente o no y generamos un
                 //mensaje indicativo
-                if ($resultModelo["correcto"]) :
+                if ($resultModelo["correcto"]):
                     $this->mensajes[] = [
                         "tipo" => "success",
-                        "mensaje" => "Los datos del usuario se obtuvieron correctamente!! :)",
+                        "mensaje" => "Los datos del mensaje se obtuvieron correctamente!! :)",
                     ];
                     //Si hemos obtenido los valores correctamente, los copiamos
                     $valnif = $resultModelo["datos"]["nif"];
@@ -417,10 +406,10 @@ class HomeController extends BaseController
                     $valrol_id = $resultModelo["datos"]["rol_id"];
                     $valpass = "";
 
-                else :
+                else:
                     $this->mensajes[] = [
                         "tipo" => "danger",
-                        "mensaje" => "No se pudieron obtener los datos de usuario!! :( <br/>({$resultModelo["error"]})",
+                        "mensaje" => "No se pudieron obtener los datos de mensaje!! :( <br/>({$resultModelo["error"]})",
                     ];
                 endif;
             }
@@ -429,7 +418,7 @@ class HomeController extends BaseController
         //Preparamos un array con todos los valores que tendremos que rellenar en
         //la vista adduser: título de la página y campos del formulario
         $parametros = [
-            "tituloventana" => "Actualización de usuario",
+            "tituloventana" => "Actualización de mensaje",
             "datos" => [
                 "txtnif" => $valnif,
                 "txtnombre" => $valnombre,
