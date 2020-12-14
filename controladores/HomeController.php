@@ -262,6 +262,11 @@ class HomeController extends BaseController
         $this->view->show("seeMessage", $parametros);
     }
 
+    /**
+     * Función que se utiliza para enviar correos electrónicos por parte de un administrador hacia una dirección de correo
+     *perteneciente a uno de los usuarios de la página web
+     * @return void
+     */
     public function addmail()
     {
 
@@ -289,15 +294,15 @@ class HomeController extends BaseController
 
                     $mail->SMTPDebug = 0; // Inhabilita la salida de depuración verbosa
                     $mail->isSMTP(); // Habilita el uso de SMTP
-                    $mail->Host = 'smtp.office365.com';  // Especifica el servidor de SMTP principal
+                    $mail->Host = 'smtp.gmail.com';  // Especifica el servidor de SMTP principal
                     $mail->SMTPAuth = true;  // Habilita la autentificación SMTP
-                    $mail->Username = 'jl.toscano@hotmail.com'; // Nombre de usuario de SMTP (usuario que existe en 
+                    $mail->Username = 'ejemplogimnasio@gmail.com'; // Nombre de usuario de SMTP (usuario que existe en 
                     //el servidor especificado, en mi caso un correo electrónico)
-                    $mail->Password = 'Tontototal'; // Contraseña del usuario indicado SMTP
+                    $mail->Password = 'Gimnasio2@'; // Contraseña del usuario indicado SMTP
                     $mail->SMTPSecure = 'tls';   // Habilita la encriptación TLS
                     $mail->Port = 587;    // Puerto TCP al que nos conectamos
 
-                    $mail->setFrom('jl.toscano@hotmail.com', 'Gimnasio pelotita'); //Dirección de correo desde la que enviamos los mensajes
+                    $mail->setFrom('ejemplogimnasio@gmail.com', 'Gimnasio pelotita'); //Dirección de correo desde la que enviamos los mensajes
                     $mail->addAddress("$receptor", 'Usuario del gimnasio');  //Podemos añadir más correos
 
                     //Contenido
@@ -308,8 +313,8 @@ class HomeController extends BaseController
                     $mail->send();
                 } catch (Exception $e) {
                     $this->mensajes[] = [
-                        'type' => 'sucess',
-                        'mensaje' => "El correo al usuario $receptor no se ha podido enviar!! $mail->ErrorInfo",
+                        'tipo' => 'danger',
+                        'mensaje' => "El correo a la dirección $receptor no se ha podido enviar!! $mail->ErrorInfo",
                     ];
                 }
             } else {
