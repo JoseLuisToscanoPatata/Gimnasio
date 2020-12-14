@@ -74,6 +74,7 @@ class MessageModel extends BaseModel
         $resultado['paginacion']['orden'] = $orden;
         $resultado['paginacion']['columna'] = $columna;
 
+
         //Definimos la variable $inicio que indique la posición del registro desde el que se
         // mostrarán los registros de una página dentro de la paginación.
         $offset = ($pagina > 1) ? (($pagina - 1) * $regsxpag) : 0;
@@ -91,12 +92,14 @@ class MessageModel extends BaseModel
 
         $resultado['paginacion']['numpaginas'] = ceil($totalregistros / $regsxpag);
 
+        $resultado['paginacion']['totalRegistros'] = $totalregistros;
+
         //Realizamos la consulta...
         try { //Definimos la instrucción SQL
 
             if ($modo == "IN") {
                 $sql = "SELECT $this->table.login AS persona, $this->table2.mensaje_id,   $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
-                $this->table2 ON   $this->table2.usu_origen = $this->table.usuario_id where   $this->table2.usu_origen = :usuario
+                $this->table2 ON   $this->table2.usu_destino = $this->table.usuario_id where   $this->table2.usu_origen = :usuario
                 order by $columna $orden LIMIT $regsxpag OFFSET $offset";
             } else {
                 $sql = "SELECT $this->table.login AS persona,  $this->table2.mensaje_id, $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
@@ -169,31 +172,27 @@ class MessageModel extends BaseModel
             "error" => null,
         ];
 
-        if ($this->comprobarRepeticion($datos, "nuevo")['existe'] == true) { //Comprobamos que no hayamos introducido datos ya existentes
-            $resultado["error"] = "Has introducido un dni, nombre de usuario u correo electrónico que ya está usado por otro usuario!! :(";
-        } else {
+        $comprobacion = $this->comprobarDestinatario($datos['receptor']);
 
+        if ($comprobacion['existe'] == 0) { //Comprobamos que no hayamos introducido datos ya existentes
+            $resultado["error"] = "El usuario al que quieres enviar el mensaje no existe!! :( ";
+        } else if ($comprobacion['existe'] == 1) {
+            $resultado["error"] = "No puedes mandarte mensajes a tí mismo!!";
+        } else {
             try {
                 //Inicializamos la transacción
                 $this->db->beginTransaction();
                 //Definimos la instrucción SQL parametrizada
-                $sql = "INSERT INTO $this->table(nif, usu_nombre, apellido1, apellido2, imagen, login,  password, email, telefono, direccion, rol_id)
-                         VALUES (:nif, :nombre, :apellido1, :apellido2, :imagen, :login, :password,:email , :telefono, :direccion, :rol_id)";
+                $sql = "INSERT INTO $this->table2(usu_origen, usu_destino, asunto, mensaje)
+                         VALUES (:origen, :destino, :asunto, :mensaje)";
                 // Preparamos la consulta...
                 $query = $this->db->prepare($sql);
                 // y la ejecutamos indicando los valores que tendría cada parámetro
                 $query->execute([
-                    'nif' => $datos["nif"],
-                    'nombre' => $datos["nombre"],
-                    'apellido1' => $datos["apellido1"],
-                    'apellido2' => $datos["apellido2"],
-                    'imagen' => $datos["imagen"],
-                    'login' => $datos["login"],
-                    'password' => sha1($datos["password"]),
-                    'email' => $datos["email"],
-                    'telefono' => $datos["telefono"],
-                    'direccion' => $datos["direccion"],
-                    'rol_id' => $datos["rol_id"],
+                    'asunto' => $datos['asunto'],
+                    'mensaje' => $datos['mensaje'],
+                    'destino' => $comprobacion['usuario']['usuario_id'],
+                    'origen' => $datos['enviador'],
                 ]); //Supervisamos si la inserción se realizó correctamente...
 
                 if ($query) {
@@ -211,11 +210,11 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que devuelve los datos de un usuario
-     * @param [type] $id Id del usuario a mostrar
-     * @return void Array con el resultado, incluyendo además los datos del usuario en caso existoso
+     * Método que devuelve los datos de un mensaje
+     * @param [type] $id Id del mensaje a mostrar
+     * @return void Array con el resultado, incluyendo además los datos del mensaje en caso existoso
      */
-    public function listamensaje($id)
+    public function listamensaje($id, $modo)
     {
         $resultado = [
             "correcto" => false,
@@ -225,9 +224,17 @@ class MessageModel extends BaseModel
 
         if ($id && is_numeric($id)) { //Comprobamos que hayamos introducido id y que sea numérica
             try {
-                $sql = "SELECT * FROM $this->table WHERE usuario_id=:id";
+
+                if ($modo == "IN") {
+                    $sql = "SELECT $this->table.login AS persona, $this->table2.mensaje as texto,   $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
+                $this->table2 ON   $this->table2.usu_destino = $this->table.usuario_id where $this->table2.mensaje_id = :cod_mensaje";
+                } else {
+                    $sql = "SELECT $this->table.login AS persona, $this->table2.mensaje as texto,   $this->table2.asunto AS asunto FROM $this->table LEFT JOIN
+                $this->table2 ON   $this->table2.usu_origen = $this->table.usuario_id where $this->table2.mensaje_id = :cod_mensaje";
+                }
+
                 $query = $this->db->prepare($sql);
-                $query->execute(['id' => $id]);
+                $query->execute(['cod_mensaje' => $id]);
                 //Supervisamos que la consulta se realizó correctamente...
                 if ($query) {
                     $resultado["correcto"] = true;
@@ -247,13 +254,16 @@ class MessageModel extends BaseModel
      * @param [type] $datos Array con los datos establecidos
      * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
-    public function comprobarRestricciones($datos)
+    public function comprobarRestricciones($datos, $modo)
     {
 
         $errores = array();
 
-        if (preg_match("/^\s*$/", $datos["receptor"])) {
-            $errores["descripcion"] = "No puedes introducir un receptor vacío!!<br>";
+        if ($modo == "mensaje") {
+
+            if (preg_match("/^\s*$/", $datos["receptor"])) {
+                $errores["descripcion"] = "No puedes introducir un receptor vacío!!<br>";
+            }
         }
 
         if (preg_match("/^\s*$/", $datos["asunto"])) {
@@ -265,5 +275,42 @@ class MessageModel extends BaseModel
         }
 
         return $errores;
+    }
+
+    /**
+     * Función que comprueba si vamos a enviar un mensaje a un destinatario existente
+     *En función del nombre de usuario de destinatario que hemos introducido
+     * @param [type] $destino
+     * @return void Devuelve un array con un booleano para comprobar si existe, así como un error en caso de que falle la consulta
+     */
+    public function comprobarDestinatario($destino)
+    {
+
+        $resultado = [
+            "usuario" => [],
+            "error" => null,
+            "existe" => 0,
+        ];
+
+        try {
+
+            $sql = "SELECT * from $this->table where login = :login";
+            $resultquery = $this->db->prepare($sql);
+            $resultquery->execute(['login' => $destino]);
+
+            if ($resultquery->rowCount() > 0) {
+
+                $resultado["usuario"] = $resultquery->fetch(PDO::FETCH_ASSOC);
+
+                if ($resultado["usuario"]["usuario_id"] == $_SESSION['id']) {
+                    $resultado["existe"] = 1;
+                } else {
+                    $resultado["existe"] = 2;
+                }
+            }
+        } catch (PDOException $ex) { //Si pasa por aquí, correcto seguirá siendo 0, que significará que ha petado
+            $resultado["error"] = $ex->getMessage();
+        }
+        return $resultado;
     }
 }

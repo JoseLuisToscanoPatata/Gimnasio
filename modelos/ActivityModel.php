@@ -67,6 +67,8 @@ class ActivityModel extends BaseModel
 
         $resultado['paginacion']['numpaginas'] = ceil($totalregistros / $regsxpag);
 
+        $resultado['paginacion']['totalRegistros'] = $totalregistros;
+
         //Realizamos la consulta...
         try { //Definimos la instrucción SQL
             $sql = "SELECT * FROM $this->table order by $columna $orden LIMIT $regsxpag OFFSET $offset";

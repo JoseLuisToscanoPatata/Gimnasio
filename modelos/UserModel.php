@@ -86,6 +86,40 @@ class UserModel extends BaseModel
     }
 
     /**
+     * Función que comprueba si existe una fila en la tabla usuarios, con los valores introducidos
+     * Sirve para comprobar si hemos introducido un correo válido en el envío de correos en la aplicacion
+     * @param [string] $correo Contraseña introducida
+     * @return type Devuelve el array con los parámetros
+     */
+    public function correoCorrecto($correo)
+    {
+        /**
+         * * -'correcto': indica si hay o no un usuario con este correo
+         * -'error': almacena el mensaje asociado a una situación errónea (excepción)
+         */
+        $resultado = [
+            "correcto" => false,
+            "error" => null,
+        ];
+
+        try {
+            $sql = "SELECT * from $this->table where ((email = :email)";
+
+            $resultquery = $this->db->prepare($sql);
+            $resultquery->execute([
+                'email' => $correo,
+            ]);
+
+            if ($resultquery->rowCount() > 0) {
+                $resultado["correcto"] = true;
+            }
+        } catch (PDOException $ex) { //Si pasa por aquí, significará que se ha petado la busqueda
+            $resultado["error"] = $ex->getMessage();
+        }
+        return $resultado;
+    }
+
+    /**
      *Método que realiza el proceso de registro y/o login de usuarios mediante cuentas de google
      * @param [type] $datos Email y tipo de autentificación utilizada por el usuario
      * @return void
@@ -273,7 +307,6 @@ class UserModel extends BaseModel
 
         return $resultado;
     }
-
     /**
      * Método que elimina el usuario cuyo id es el que se le pasa como parámetro
      * @param $id es un valor numérico. Es el campo clave de la tabla
@@ -493,7 +526,7 @@ class UserModel extends BaseModel
             $errores["usuario"] = "No has introducido un nombre de usuario válido!!<br>";
         }
 
-        if (!preg_match("/^\w+([\.-_]?w+)*@\w+(\.(com|es|net|org|yahoo))+$/", $datos["email"])) {
+        if (!preg_match("/^\w+([.-_]?\w+)*@\w+(\.(com|es|net|org|yahoo))+$/", $datos["email"])) {
             $errores["email"] = "No has introducido una dirección de correo válida!!<br>";
         }
 

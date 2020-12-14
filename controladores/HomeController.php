@@ -3,8 +3,17 @@
 /**
  * Incluimos los modelos que necesite este controlador, en este caso, Activity controler
  */
+
+require 'vendor/phpmailer/phpmailer/src/Exception.php';
+require 'vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require 'vendor/phpmailer/phpmailer/src/SMTP.php';
+
 require_once MODELS_FOLDER . 'UserModel.php';
 require_once MODELS_FOLDER . 'MessageModel.php';
+
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
+
 /**
  * Clase controlador de la página de inicio,  al portal desde la que se realizarán funcones varias,
  * como el trato de los mensajes entre usuarios, o la redirección a la página de inicio del usuario
@@ -34,12 +43,11 @@ class HomeController extends BaseController
         $this->modeloUser = new UserModel();
         $this->modeloMens = new MessageModel();
         $this->mensajes = [];
-
     }
 
     /**
      * Metodo que me lleva a la página de inicio de un usuario
-     * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
+     * @return void No devuelve nada, pues simplemente muestra la lista, pasándole los parámetros
      */
     public function index()
     {
@@ -48,6 +56,10 @@ class HomeController extends BaseController
         $parametros = [
             "tituloventana" => "Página de inicio",
         ];
+
+        if (isset($_SESSION['modo'])) { //Si existe la sesión del modo de la bandeja, la borramos
+            unset($_SESSION['modo']);
+        }
         $this->view->show("inicio", $parametros);
     }
 
@@ -64,20 +76,22 @@ class HomeController extends BaseController
             "datos" => null,
             "mensajes" => [],
             "paginacion" => [],
-            "modo" => $_GET['modo'], //Variable que indicará si queremos mostrar la bandeja de entrada o de salida
         ];
 
+        if (!isset($_SESSION['modo'])) { //Sesión que utilizamos para diferenciar entre la bandeja de entrada y de salida
+            $_SESSION['modo'] = $_GET['modo']; //Si no existe dicha sesión, la creamos
+        }
         // Realizamos la consulta y almacenamos los resultados en la variable $resultModelo
-        $resultModelo = $this->modeloMens->listado($parametros['modo']);
+        $resultModelo = $this->modeloMens->listado($_SESSION['modo']);
         // Si la consulta se realizó correctamente transferimos los datos obtenidos
         // de la consulta del modelo ($resultModelo["datos"]) a nuestro array parámetros
         // ($parametros["datos"]), que será el que le pasaremos a la vista para visualizarlos
-        if ($resultModelo["correcto"]):
+        if ($resultModelo["correcto"]) :
             $parametros["datos"] = $resultModelo["datos"];
             $parametros["paginacion"] = $resultModelo["paginacion"]; //También obtenemos los datos necesarios para la paginación
-            //Definimos el mensaje para el alert de la vista de que todo fue correctamente
+        //Definimos el mensaje para el alert de la vista de que todo fue correctamente
 
-        else:
+        else :
             //Definimos el mensaje para el alert de la vista de que se produjeron errores al realizar el listado
             $this->mensajes[] = [
                 "tipo" => "danger",
@@ -103,15 +117,15 @@ class HomeController extends BaseController
         if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
             $id = $_GET["id"];
             //Realizamos la operación de suprimir el mensaje con el id=$id
-            $resultModelo = $this->modeloMens->delMens($id);
+            $resultModelo = $this->modeloMens->delmessage($id);
             //Analizamos el valor devuelto por el modelo para definir el mensaje a
             //mostrar en la vista listado
-            if ($resultModelo["correcto"]):
+            if ($resultModelo["correcto"]) :
                 $this->mensajes[] = [
                     "tipo" => "success",
                     "mensaje" => "Se eliminó correctamente el mensaje!!",
                 ];
-            else: //Si ha habido errores en el proceso de borrado del mensaje
+            else : //Si ha habido errores en el proceso de borrado del mensaje
                 $this->mensajes[] = [
                     "tipo" => "danger",
                     "mensaje" => "La eliminación del mensaje no se realizó correctamente!! :( <br/>({$resultModelo["error"]})",
@@ -132,17 +146,17 @@ class HomeController extends BaseController
      */
     public function addmessage()
     {
-
         require_once CHECK_SESSION_FILE; //Comprobamos la sesión, abriendola en el proceso, para el posible uso de sesiones
         // Array asociativo que almacenará los mensajes de error que se generen por cada campo
         $errores = array();
+        $enviador = $_SESSION['id'];
         // Si se ha pulsado el botón guardar...
         if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) { // y hemos recibido las variables del formulario y éstas no están vacías...
 
             $receptor = $_POST['txtlogin']; //Guardamos todos los valores obtenidos
             $asunto = $_POST['txtasunto'];
             $mensaje = $_POST['txtmensaje'];
-            $enviador = $_POST['id'];
+
 
             $datosSaneados = $this->modeloUser->sanearValores([ //Saneamos dichos valores
                 'receptor' => $receptor,
@@ -150,67 +164,26 @@ class HomeController extends BaseController
                 'mensaje' => $mensaje,
             ]);
 
-            $errores = $this->modeloUser->comprobarRestricciones($datosSaneados); //Obtenemos los posibles errores del saneamiento
-            //Para decidir si seguir o no con la operación
+            $errores = $this->modeloMens->comprobarRestricciones($datosSaneados, "mensaje"); //Obtenemos los posibles errores del saneamiento
 
-            /* Realizamos la carga de la imagen en el servidor */
-            //       Comprobamos que el campo tmp_name tiene un valor asignado para asegurar que hemos
-            //       recibido la imagen correctamente
-            //       Definimos la variable $imagen que almacenará el nombre de imagen
-            //       que almacenará la Base de Datos inicializada a NULL
-            $imagen = null;
-
-            if (isset($_FILES["imagen"]) && (!empty($_FILES["imagen"]["tmp_name"]))) {
-                // Verificamos la carga de la imagen
-                // Comprobamos si existe el directorio fotos, y si no, lo creamos
-                if (!is_dir("assets/fotos")) {
-                    $dir = mkdir("assets/fotos", 0777, true);
-                } else {
-                    $dir = true;
-                }
-                // Ya verificado que la carpeta uploads existe movemos el fichero seleccionado a dicha carpeta
-                if ($dir) {
-                    //Para asegurarnos que el nombre va a ser único...
-                    $nombrefichimg = time() . "-" . $_FILES["imagen"]["name"];
-                    // Movemos el fichero de la carpeta temportal a la nuestra
-                    $movfichimg = move_uploaded_file($_FILES["imagen"]["tmp_name"], "assets/fotos/" . $nombrefichimg);
-                    $imagen = $nombrefichimg;
-                    // Verficamos que la carga se ha realizado correctamente
-                    if (!$movfichimg) {
-
-                        $this->mensajes[] = [
-                            "tipo" => "danger",
-                            "mensaje" => "Error: La imagen no se cargó correctamente! :(",
-                        ];
-                        $errores["imagen"] = "Error: La imagen no se cargó correctamente! :(";
-                    }
-                }
-            }
             // Si no se han producido errores realizamos el registro del mensaje
             if (count($errores) == 0) {
-                $resultModelo = $this->modelo->adduser([
-                    'nif' => $datosSaneados['nif'],
-                    'nombre' => $datosSaneados['nombre'],
-                    'apellido1' => $datosSaneados['apellido1'],
-                    'apellido2' => $datosSaneados['apellido2'],
-                    'login' => $datosSaneados['login'],
-                    "password" => $datosSaneados['password'],
-                    'email' => $datosSaneados['email'],
-                    'telefono' => $datosSaneados['telefono'],
-                    'direccion' => $datosSaneados['direccion'],
-                    'imagen' => $imagen,
-                    'rol_id' => $rol_id,
-
+                $resultModelo = $this->modeloMens->addmessage([
+                    'receptor' => $datosSaneados['receptor'],
+                    'asunto' => $datosSaneados['asunto'],
+                    'mensaje' => $datosSaneados['mensaje'],
+                    'enviador' => $enviador,
                 ]);
-                if ($resultModelo["correcto"]):
+
+                if ($resultModelo["correcto"]) :
                     $this->mensajes[] = [
                         "tipo" => "success",
-                        "mensaje" => "El mensajes se registró correctamente!! :)",
+                        "mensaje" => "El mensaje se envió correctamente!! :)",
                     ];
-                else: //Si hemos obtenido errores en el proceso de adición del mensaje a la tabla..
+                else : //Si hemos obtenido errores en el proceso de adición del mensaje a la tabla..
                     $this->mensajes[] = [
                         "tipo" => "danger",
-                        "mensaje" => "El mensaje no pudo registrarse!! :( <br />({$resultModelo["error"]})",
+                        "mensaje" => "El mensaje no pudo enviarse!! :( <br />({$resultModelo["error"]})",
                     ];
                 endif;
             } else {
@@ -226,21 +199,14 @@ class HomeController extends BaseController
         //De lo contrario tendremos los campos llenos con los valores introducidos
 
         $parametros = [
-            "tituloventana" => "Creación de mensaje",
+            "tituloventana" => "Envío de mensaje",
             "datos" => [
-                "txtnif" => isset($datosSaneados['nif']) ? $datosSaneados['nif'] : "",
-                "txtnombre" => isset($datosSaneados['nombre']) ? $datosSaneados['nombre'] : "",
-                "txtapellido1" => isset($datosSaneados['apellido1']) ? $datosSaneados['apellido1'] : "",
-                "txtapellido2" => isset($datosSaneados['apellido2']) ? $datosSaneados['apellido2'] : "",
-                "txtlogin" => isset($datosSaneados['login']) ? $datosSaneados['login'] : "",
-                "txtpass" => isset($datosSaneados['password']) ? $datosSaneados['password'] : "",
-                "txtemail" => isset($datosSaneados['email']) ? $datosSaneados['email'] : "",
-                "imagen" => isset($imagen) ? $imagen : "",
-                "txttelefono" => isset($datosSaneados['telefono']) ? $datosSaneados['telefono'] : "",
-                "txtdireccion" => isset($datosSaneados['direccion']) ? $datosSaneados['direccion'] : "",
-                "rol_id" => isset($rol_id) ? $rol_id : 2,
+                "txtlogin" => isset($datosSaneados['receptor']) ? $datosSaneados['receptor'] : "",
+                "txtasunto" => isset($datosSaneados['asunto']) ? $datosSaneados['asunto'] : "",
+                "txtmensaje" => isset($datosSaneados['mensaje']) ? $datosSaneados['mensaje'] : "",
             ],
             "mensajes" => $this->mensajes,
+            "id_origen" => isset($enviador) ? $enviador : "",
         ];
         //Visualizamos la vista asociada al registro de mensajes
         $this->view->show("AddMessage", $parametros);
@@ -254,113 +220,100 @@ class HomeController extends BaseController
     public function seemessage()
     {
         require_once CHECK_SESSION_FILE;
+
+        $parametros = [
+            "tituloventana" => "Visualizacion de mensaje",
+            "datos" => null,
+            "mensajes" => [],
+        ];
         // Array asociativo que almacenará los mensajes de error que se generen por cada campo
         $errores = array();
         // Inicializamos valores de los campos de texto
-        $valnombre = "";
-        $valapellido1 = "";
-        $valapellido2 = "";
-        $vallogin = "";
-        $valemail = "";
-        $valtelefono = "";
-        $valdireccion = "";
-        $valimagen = "";
-        $valrol_id = "";
-        $valpass = "";
 
-        // Si se ha pulsado el botón actualizar...
-        if (isset($_POST['submit'])) { //Realizamos la actualización con los datos existentes en los campos
-            $id = $_POST['id']; //Lo recibimos por el campo oculto
-            $nuevorol_id = $_POST['rol_id'];
-            $nuevonif = $_POST['txtnif'];
-            $nuevonombre = $_POST['txtnombre'];
-            $nuevoemail = $_POST['txtemail'];
-            $nuevoapellido1 = $_POST['txtapellido1'];
-            $nuevoapellido2 = $_POST['txtapellido2'];
-            $nuevologin = $_POST['txtlogin'];
-            $nuevotelefono = $_POST['txttelefono'];
-            $nuevodireccion = $_POST['txtdireccion'];
-            $nuevaimagen = "";
-            $nuevapassword = $_POST['txtpass'];
+        //Estamos rellenando los campos con los valores recibidos del listado
+        if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
+            $id = $_GET['id'];
+            //Ejecutamos la consulta para obtener los datos del mensaje #id
+            $resultModelo = $this->modeloMens->listamensaje($id, $_SESSION['modo']);
+            //Analizamos si la consulta se realiz´correctamente o no y generamos un
+            //mensaje indicativo
+            if ($resultModelo["correcto"]) :
+                $parametros['datos'] = $resultModelo['datos'];
 
-            $datosSaneados = $this->modelo->sanearValores([ //Saneamos los datos introducidos, evitando carácteres especiales
-                'nif' => $nuevonif,
-                'nombre' => $nuevonombre,
-                'apellido1' => $nuevoapellido1,
-                'apellido2' => $nuevoapellido2,
-                'login' => $nuevologin,
-                "password" => $nuevapassword,
-                'email' => $nuevoemail,
-                'telefono' => $nuevotelefono,
-                'direccion' => $nuevadireccion,
+                $this->mensajes[] = [
+                    "tipo" => "success",
+                    "mensaje" => "Los datos del mensaje se obtuvieron correctamente!! :)",
+                ];
+            //Si hemos obtenido los valores correctamente, los copiamos
+
+            else :
+                $this->mensajes[] = [
+                    "tipo" => "danger",
+                    "mensaje" => "No se pudieron obtener los datos de mensaje!! :( <br/>({$resultModelo["error"]})",
+                ];
+            endif;
+        }
+
+
+        //Preparamos un array con todos los valores que tendremos que rellenar en
+        //la vista adduser: título de la página y campos del formulario
+        $parametros['mensajes'] = $this->mensajes;
+        //Mostramos la vista actuser
+        $this->view->show("seeMessage", $parametros);
+    }
+
+    public function addmail()
+    {
+
+        require_once CHECK_SESSION_FILE;
+
+        if (isset($_POST) && !empty($_POST) && isset($_POST['submit'])) { // y hemos recibido las variables del formulario y éstas no están vacías...
+
+            $asunto = $_POST['txtasunto'];
+            $mensaje = $_POST['txtmensaje'];
+            $receptor = $_POST['txtemail'];
+
+            $datosSaneados = $this->modeloUser->sanearValores([ //Saneamos dichos valores
+                'asunto' => $asunto,
+                'mensaje' => $mensaje,
+                'receptor' => $receptor,
             ]);
 
-            $errores = $this->modelo->comprobarRestricciones($datosSaneados); //Obtenemos los posibles errores del saneamiento
-            //Para decidir si seguir o no con la operación
+            $errores = $this->modeloMens->comprobarRestricciones($datosSaneados, "correo"); //Obtenemos los posibles errores del saneamiento
 
-            // Definimos la variable $imagen que almacenará el nombre de imagen
-            // que almacenará la Base de Datos inicializada a NULL
-            $imagen = null;
-
-            if (isset($_FILES["imagen"]) && (!empty($_FILES["imagen"]["tmp_name"]))) {
-                // Verificamos la carga de la imagen
-                // Comprobamos si existe el directorio fotos, y si no, lo creamos
-                if (!is_dir("assets/fotos")) {
-                    $dir = mkdir("assets/fotos", 0777, true);
-                } else {
-                    $dir = true;
-                }
-                // Ya verificado que la carpeta fotos existe movemos el fichero seleccionado a dicha carpeta
-                if ($dir) {
-                    //Para asegurarnos que el nombre va a ser único...
-                    $nombrefichimg = time() . "-" . $_FILES["imagen"]["name"];
-                    // Movemos el fichero de la carpeta temportal a la nuestra
-                    $movfichimg = move_uploaded_file($_FILES["imagen"]["tmp_name"], "assets/fotos/" . $nombrefichimg);
-                    $imagen = $nombrefichimg;
-                    // Verficamos que la carga se ha realizado correctamente
-                    if (!$movfichimg) {
-                        //Si no pudo moverse a la carpeta destino generamos un mensaje que se le
-                        //mostrará al mensaje en la vista actuser
-                        $errores["imagen"] = "Error: La imagen no se cargó correctamente! :(";
-                        $this->mensajes[] = [
-                            "tipo" => "danger",
-                            "mensaje" => "Error: La imagen no se cargó correctamente! :(",
-                        ];
-                    }
-                }
-            }
-            $nuevaimagen = $imagen;
-
+            // Si no se han producido errores realizamos el registro del mensaje
             if (count($errores) == 0) {
-                //Ejecutamos la instrucción de actualización a la que le pasamos los valores
-                $resultModelo = $this->modelo->actuser([
-                    'nif' => $datosSaneados['nif'],
-                    'nombre' => $datosSaneados['nombre'],
-                    'apellido1' => $datosSaneados['apellido1'],
-                    'apellido2' => $datosSaneados['apellido2'],
-                    'login' => $datosSaneados['login'],
-                    "password" => $datosSaneados['password'],
-                    'email' => $datosSaneados['email'],
-                    'telefono' => $datosSaneados['telefono'],
-                    'direccion' => $datosSaneados['direccion'],
-                    'imagen' => $nuevaimagen,
-                    'rol_id' => $rol_id,
-                    'id' => $id,
-                ]);
-                //Analizamos cómo finalizó la operación de registro y generamos un mensaje
-                //indicativo del estado correspondiente
-                if ($resultModelo["correcto"]):
+
+                $mail = new PHPMailer(true);
+                try {
+
+                    $mail->SMTPDebug = 0; // Inhabilita la salida de depuración verbosa
+                    $mail->isSMTP(); // Habilita el uso de SMTP
+                    $mail->Host = 'smtp.office365.com';  // Especifica el servidor de SMTP principal
+                    $mail->SMTPAuth = true;  // Habilita la autentificación SMTP
+                    $mail->Username = 'jl.toscano@hotmail.com'; // Nombre de usuario de SMTP (usuario que existe en 
+                    //el servidor especificado, en mi caso un correo electrónico)
+                    $mail->Password = 'Tontototal'; // Contraseña del usuario indicado SMTP
+                    $mail->SMTPSecure = 'tls';   // Habilita la encriptación TLS
+                    $mail->Port = 587;    // Puerto TCP al que nos conectamos
+
+                    $mail->setFrom('jl.toscano@hotmail.com', 'Gimnasio pelotita'); //Dirección de correo desde la que enviamos los mensajes
+                    $mail->addAddress("$receptor", 'Usuario del gimnasio');  //Podemos añadir más correos
+
+                    //Contenido
+                    $mail->isHTML(true);    // Establecemos el formato del email a html
+                    $mail->Subject = $datosSaneados['asunto']; //Establecemos el asunto, según el introducido
+                    $mail->Body    = $datosSaneados['mensaje'];
+
+                    $mail->send();
+                } catch (Exception $e) {
                     $this->mensajes[] = [
-                        "tipo" => "success",
-                        "mensaje" => "El mensaje se actualizó correctamente!! :)",
+                        'type' => 'sucess',
+                        'mensaje' => "El correo al usuario $receptor no se ha podido enviar!! $mail->ErrorInfo",
                     ];
-                else:
-                    $this->mensajes[] = [
-                        "tipo" => "danger",
-                        "mensaje" => "El mensaje no pudo actualizarse!! :( <br/>({$resultModelo["error"]})",
-                    ];
-                endif;
+                }
             } else {
+                //Si hemos tenido errores de restricciones de campos del formulario..
                 foreach ($errores as &$error) {
                     $this->mensajes[] = [
                         "tipo" => "danger",
@@ -368,74 +321,19 @@ class HomeController extends BaseController
                     ];
                 }
             }
+        } //Si no hemos pulsado el botón submit (porque hemos venido ahora a esta ventana), tendremos los campos vacíos
+        //De lo contrario tendremos los campos llenos con los valores introducidos
 
-            // Obtenemos los valores para mostrarlos en los campos del formulario
-            $valnif = $datosSaneados['nif'];
-            $valnombre = $datosSaneados['nombre'];
-            $valapellido1 = $datosSaneados['apellido1'];
-            $valapellido2 = $datosSaneados['apellido2'];
-            $vallogin = $datosSaneados['login'];
-            $valemail = $datosSaneados['email'];
-            $valimagen = $nuevaimagen;
-            $valtelefono = $datosSaneados['telefono'];
-            $valdireccion = $datosSaneados['direccion'];
-            $valrol_id = $nuevorol_id;
-            $valpass = $datosSaneados['password'];
-        } else { //Estamos rellenando los campos con los valores recibidos del listado
-            if (isset($_GET['id']) && (is_numeric($_GET['id']))) {
-                $id = $_GET['id'];
-                //Ejecutamos la consulta para obtener los datos del mensaje #id
-                $resultModelo = $this->modelo->listausuario($id);
-                //Analizamos si la consulta se realiz´correctamente o no y generamos un
-                //mensaje indicativo
-                if ($resultModelo["correcto"]):
-                    $this->mensajes[] = [
-                        "tipo" => "success",
-                        "mensaje" => "Los datos del mensaje se obtuvieron correctamente!! :)",
-                    ];
-                    //Si hemos obtenido los valores correctamente, los copiamos
-                    $valnif = $resultModelo["datos"]["nif"];
-                    $valnombre = $resultModelo["datos"]["usu_nombre"];
-                    $valapellido1 = $resultModelo["datos"]["apellido1"];
-                    $valapellido2 = $resultModelo["datos"]["apellido2"];
-                    $vallogin = $resultModelo["datos"]["login"];
-                    $valemail = $resultModelo["datos"]["email"];
-                    $valimagen = $resultModelo["datos"]["imagen"];
-                    $valtelefono = $resultModelo["datos"]["telefono"];
-                    $valdireccion = $resultModelo["datos"]["direccion"];
-                    $valrol_id = $resultModelo["datos"]["rol_id"];
-                    $valpass = "";
-
-                else:
-                    $this->mensajes[] = [
-                        "tipo" => "danger",
-                        "mensaje" => "No se pudieron obtener los datos de mensaje!! :( <br/>({$resultModelo["error"]})",
-                    ];
-                endif;
-            }
-        }
-
-        //Preparamos un array con todos los valores que tendremos que rellenar en
-        //la vista adduser: título de la página y campos del formulario
         $parametros = [
-            "tituloventana" => "Actualización de mensaje",
+            "tituloventana" => "Envío de correos",
             "datos" => [
-                "txtnif" => $valnif,
-                "txtnombre" => $valnombre,
-                "txtapellido1" => $valapellido1,
-                "txtapellido2" => $valapellido2,
-                "txtlogin" => $vallogin,
-                "txtemail" => $valemail,
-                "txttelefono" => $valtelefono,
-                "txtdireccion" => $valdireccion,
-                "imagen" => $valimagen,
-                "rol_id" => $valrol_id,
-                "txtpass" => $valpass,
+                "txtasunto" => isset($datosSaneados['asunto']) ? $datosSaneados['asunto'] : "",
+                "txtmensaje" => isset($datosSaneados['mensaje']) ? $datosSaneados['mensaje'] : "",
+                "txtemail" => isset($datosSaneados['receptor']) ? $datosSaneados['receptor'] : "",
             ],
             "mensajes" => $this->mensajes,
-            "id" => $id,
         ];
-        //Mostramos la vista actuser
-        $this->view->show("ActUser", $parametros);
+        //Visualizamos la vista asociada al registro de mensajes
+        $this->view->show("AddMail", $parametros);
     }
 }

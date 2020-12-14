@@ -18,18 +18,18 @@
                <form action="?controller=activity&accion=addactivity" method="post" enctype="multipart/form-data" id="formRegistro">
 
                   <div class="form-group">
-                     <label for="nombre">Nombre: </label>
+                     <label for="nombre">Nombre </label>
                      <input type="text" class="form-control" id="nombre" name="txtnombre" placeholder="Solo se aceptan valores alfabéticos" value="<?= $datos["txtnombre"] ?>" required maxlength="30">
                   </div>
 
                   <div class="form-group">
-                     <label for="descripcion">Descripción: </label>
+                     <label for="descripcion">Descripción </label>
                      <input type="textarea" class="form-control" id="descripcion" name="txtdescripcion" placeholder="Descripción de la actividad.." value="<?= $datos["txtdescripcion"] ?>" required maxlength="50">
                   </div>
 
 
                   <div class="form-group">
-                     <label for="aforo">Aforo: </label>
+                     <label for="aforo">Aforo </label>
                      <input type="text" class="form-control" id="aforo" name="txtaforo" placeholder="Máximo 30 personas" value="<?= $datos["txtaforo"] ?>" required maxlength="2" size="5">
                   </div>
 

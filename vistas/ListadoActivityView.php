@@ -29,13 +29,17 @@
                <!--Creamos la tabla que utilizaremos para el listado:-->
                <table class="table" style="color: white;" id="actividades">
 
-                  <tr>
-                     <td><input type="text" placeholder="Id.." onkeyup="filtrarTabla('fillId', 'actividades',0)" id="fillId"></td>
-                     <td><input type="text" placeholder="Nombre.." onkeyup="filtrarTabla('fillNombre', 'actividades',1)" id="fillNombre"></td>
-                     <td><input type="text" placeholder="Aforo.." onkeyup="filtrarTabla('fillAforo', 'actividades',2)" id="fillAforo"></td>
-                     <td><input type="text" placeholder="Descripcion.." onkeyup="filtrarTabla('fillDescp', 'actividades',3)" id="fillDescp"></td>
-                     <td style="display: none;"></td>
-                  </tr>
+                  <?php if ($paginacion['totalRegistros'] > 0) { ?>
+
+                     <tr>
+                        <td><input type="text" placeholder="Id.." onkeyup="filtrarTabla('fillId', 'actividades',0)" id="fillId"></td>
+                        <td><input type="text" placeholder="Nombre.." onkeyup="filtrarTabla('fillNombre', 'actividades',1)" id="fillNombre"></td>
+                        <td><input type="text" placeholder="Aforo.." onkeyup="filtrarTabla('fillAforo', 'actividades',2)" id="fillAforo"></td>
+                        <td><input type="text" placeholder="Descripcion.." onkeyup="filtrarTabla('fillDescp', 'actividades',3)" id="fillDescp"></td>
+                        <td style="display: none;"></td>
+                     </tr>
+
+                  <?php } ?>
                   <tr>
                      <th class="bg-primary" style="width: 50px;"> <a href="index.php?controller=activity&accion=listado&regsxpag=<?= $paginacion['regsxpag'] ?>&orden=<?php if ($paginacion['columna'] == 'actividad_id' && $paginacion['orden'] == 'desc') {
                                                                                                                                                                            echo 'asc';
@@ -63,26 +67,32 @@
                      <th style="background-color: #cd5afa; width: 100px;">Operaciones</th>
                   </tr>
                   <!--Los datos a listar están almacenados en $parametros["datos"], que lo recibimos del controlador-->
-                  <?php foreach ($datos as $d) : ?>
-                     <!--Mostramos cada registro en una fila de la tabla-->
-                     <tr>
-                        <td class="bg-primary"><?= $d["actividad_id"] ?></td>
-                        <td class="bg-info"><?= $d["act_nombre"] ?></td>
-                        <td class="bg-success"><?= $d["aforo"] ?></td>
-                        <td class="bg-warning"><?= $d["descripcion"] ?></td>
-                        <td style="background-color: #cd5afa;" id="iconosTabla">
-                           <a href=" ?controller=activity&accion=actactivity&id=<?= $d['actividad_id'] ?>">
-                              <img src="assets/images/edit.svg" alt="Editar Actividad">
-                           </a>
-                           <a href="?controller=activity&accion=delactivity&id=<?= $d['actividad_id'] ?>">
-                              <img src="assets/images/delete.svg" alt="Eliminar usuario">
-                           </a>
-                        </td>
-                     <tr>
+                  <?php if ($paginacion['totalRegistros'] > 0) {
 
+                     foreach ($datos as $d) : ?>
+                        <!--Mostramos cada registro en una fila de la tabla-->
+                        <tr>
+                           <td class="bg-primary"><?= $d["actividad_id"] ?></td>
+                           <td class="bg-info"><?= $d["act_nombre"] ?></td>
+                           <td class="bg-success"><?= $d["aforo"] ?></td>
+                           <td class="bg-warning"><?= $d["descripcion"] ?></td>
+                           <td style="background-color: #cd5afa;" id="iconosTabla">
+                              <a href=" ?controller=activity&accion=actactivity&id=<?= $d['actividad_id'] ?>">
+                                 <img src="assets/images/edit.svg" alt="Editar Actividad">
+                              </a>
+                              <a href="?controller=activity&accion=delactivity&id=<?= $d['actividad_id'] ?>">
+                                 <img src="assets/images/delete.svg" alt="Eliminar usuario">
+                              </a>
+                           </td>
+                        </tr>
 
+                     <?php endforeach;
+                  } else { ?>
+
+                     <tr>
+                        <td style="background-color:white; text-align:center; color: black;" colspan="3"> No se han encontrado actividades!!</td>
                      </tr>
-                  <?php endforeach; ?>
+                  <?php } ?>
 
                </table>
 

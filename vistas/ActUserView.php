@@ -51,15 +51,20 @@
                         <input type="text" class="form-control" id="usuario" name="txtlogin" placeholder="Inserte su nombre de usuario" value="<?= $datos["txtlogin"] ?>" required maxlength="30">
                      </div>
 
-                     <div class="form-group col-md-6">
-                        <label for="password">Contraseña: </label>
-                        <input type="<?php if ($_SESSION['id'] == $id) {
-                                          echo 'password';
-                                       } else {
-                                          echo 'hidden';
-                                       } ?>" class="form-control" id="password" name="txtpass" placeholder="Inserte su contraseña" value="<?= $datos["txtpass"] ?>" required maxlength="30">
-                     </div>
+                     <?php if ($_SESSION['id'] == $id) { ?>
+                        <div class="form-group col-md-6">
+                           <label for="password">Contraseña: </label>
+                           <input type="password" class="form-control" id="password" name="txtpass" placeholder="Inserte su contraseña" value="<?= $datos["txtpass"] ?>" required maxlength="30">
+                        </div>
+                     <?php } else { ?>
+
+                        <div class="form-group col-md-6">
+                           <input type="hidden" class="form-control" id="password" name="txtpass" placeholder="Inserte su contraseña" value="<?= $datos["txtpass"] ?>" required maxlength="30">
+                        </div>
+                     <?php } ?>
                   </div>
+
+
 
                   <div class="row">
                      <div class="form-group col-md-6">

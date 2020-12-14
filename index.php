@@ -10,8 +10,6 @@ spl_autoload_register(function ($nombre) {
    require 'core/' . $nombre . '.php';
 });
 
-require __DIR__ . '/vendor/autoload.php';
-
 try {
    //Lo iniciamos con su método estático main.
    FrontController::main();

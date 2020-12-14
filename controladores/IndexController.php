@@ -210,8 +210,8 @@ class IndexController extends BaseController
     {
         include_once 'gpConfig.php';
 
-        if (isset($_GET['code'])) {
-            $gClient->authenticate($_GET['code']);
+        if (isset($_GET['conexion'])) {
+            $gClient->authenticate($_GET['conexion']);
             $_SESSION['token'] = $gClient->getAccessToken();
         }
 
