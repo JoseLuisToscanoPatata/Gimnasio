@@ -32,7 +32,7 @@ class UserController extends BaseController
     }
 
     /**
-     * Método que obtiene de la base de datos el listado de usuarios y envía dicha
+     * Funcion que obtiene de la base de datos el listado de usuarios y envía dicha
      * infomación a la vista correspondiente para su visualización
      */
     public function listado()
@@ -70,7 +70,7 @@ class UserController extends BaseController
     }
 
     /**
-     * Metodo que elimina un usuario seleccionado de la tabla de usuarios, proveniendo su id
+     * Funcion que elimina un usuario seleccionado de la tabla de usuarios, proveniendo su id
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function deluser()
@@ -105,7 +105,7 @@ class UserController extends BaseController
         $this->listado();
     }
     /**
-     * Metodo que añade un usuario nuevo, cuyas propiedades indicamos por formulario
+     * Funcion que añade un usuario nuevo, cuyas propiedades indicamos por formulario
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function adduser()
@@ -237,7 +237,7 @@ class UserController extends BaseController
     }
 
     /**
-     * Método que permite nos permite actualizar los datos de un usuario elegido, cuya id coincide con la que
+     * Funcion que permite nos permite actualizar los datos de un usuario elegido, cuya id coincide con la que
      * se pasa como parámetro desde la vista del listado, a través de GET
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
@@ -431,7 +431,7 @@ class UserController extends BaseController
 
 
     /**
-     * Método que cambia el estado de un usuario cuya id obtenemos mediante GET
+     * Funcion que cambia el estado de un usuario cuya id obtenemos mediante GET
      */
     public function cambiarEstado()
     {

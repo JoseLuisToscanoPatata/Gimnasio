@@ -6,9 +6,7 @@
  */
 class ActivityModel extends BaseModel
 {
-    /**
-     *
-     */
+
     private $id;
 
     private $act_nombre;
@@ -26,7 +24,7 @@ class ActivityModel extends BaseModel
 
     /**
      * Función que realiza el listado de todas las actividades registrados
-     * @return type Devuelve el array con los parámetros
+     * @return array Devuelve el array con los errores, datos, comprobación y paginación
      */
     public function listado()
     {
@@ -88,8 +86,8 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     * Método que elimina la actividad cuya id es el que se le pasa como parámetro
-     * @param $id es un valor numérico. Es el campo clave de la tabla
+     * Funcion que elimina la actividad cuya id es el que se le pasa como parámetro
+     * @param int $id es un valor numérico. Es el campo clave de la tabla
      * @return boolean Array con el resultado, true o false, y con los errores en el último caso
      */
     public function delactivity($id)
@@ -127,9 +125,9 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     *Método que añade una actividad a la base de datos, cuyos datos hemos introducido previamente por un formulario
-     * @param type $datos Datos de la actividad a crear
-     * @return type Array con el resultado, true o false, y con los errores en el último caso
+     *Funcion que añade una actividad a la base de datos, cuyos datos hemos introducido previamente por un formulario
+     * @param array $datos Datos de la actividad a crear
+     * @return array Array con el resultado, true o false, y con los errores en el último caso
      */
     public function addactivity($datos)
     {
@@ -171,9 +169,9 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     * Método que actualiza un elemento de la tabla actividad, con los datos que hayamos introducido previamente mediante formulario
-     * @param [type] $datos Nuevos datos de la actividad
-     * @return void Array  con el resultado, true o false, así como los errores en el último caso
+     * Funcion que actualiza un elemento de la tabla actividad, con los datos que hayamos introducido previamente mediante formulario
+     * @param array $datos Nuevos datos de la actividad
+     * @return array Array  con el resultado, true o false, así como los errores en el último caso
      */
     public function actactivity($datos)
     {
@@ -214,9 +212,9 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     * Método que devuelve los datos de una actividad
-     * @param [type] $id Id de la actividad a mostrar
-     * @return void Array con el resultado, incluyendo además los datos del usuario en caso existoso
+     * Funcion que devuelve los datos de una actividad
+     * @param int $id Id de la actividad a mostrar
+     * @return array Array con el resultado, incluyendo además los datos del usuario en caso existoso
      */
     public function listaactividad($id)
     {
@@ -246,9 +244,9 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     * Método que sanea los valores introducidos en los formularios
-     * @param [type] $valores Datos introducidos sin sanear
-     * @return [array] $valores Datos saneados, elimiando carácteres especiales
+     * Funcion que sanea los valores introducidos en los formularios
+     * @param array $valores Datos introducidos sin sanear
+     * @return array $valores Datos saneados, elimiando carácteres especiales
      */
     public function sanearValores($valores)
     {
@@ -260,10 +258,10 @@ class ActivityModel extends BaseModel
     }
 
     /**
-     * Metodo que me comprueba si los valores introducidos en los campos de una actividad, para el registro de una nueva o la actualización de una existente,
+     * Funcion que me comprueba si los valores introducidos en los campos de una actividad, para el registro de una nueva o la actualización de una existente,
      *  cumple con las restricciones establecidas de formato para estas
-     * @param [type] $datos Array con los datos establecidos
-     * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
+     * @param array $datos Array con los datos establecidos
+     * @return array $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
     public function comprobarRestricciones($datos)
     {
@@ -287,9 +285,9 @@ class ActivityModel extends BaseModel
 
     /**
      * Función que comprueba si existe una actividad con el nombre introducido, que se utiliza para evitar que se repitan actividades
-     * @param [type] $datosAct datos del usuario a introducir
-     * @param [type] $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
-     * @return void Array con el resultado de la consulta y un error, en caso de que se provocase
+     * @param array $datosAct datos del usuario a introducir
+     * @param String $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
+     * @return array Array con el resultado de la consulta y un error, en caso de que se provocase
      */
     public function comprobarRepeticion($datosAct, $modo)
     {

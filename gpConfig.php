@@ -1,6 +1,7 @@
 <?php
-session_start();
-
+if (session_status() == PHP_SESSION_NONE) {
+   session_start();
+}
 //Include Google client library 
 include_once 'assets/src/Google_Client.php';
 include_once 'assets/src/contrib/Google_Oauth2Service.php';

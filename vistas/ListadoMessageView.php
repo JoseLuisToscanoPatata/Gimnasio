@@ -129,10 +129,6 @@
                   <input type="submit" value="NUEVO MENSAJE" name="añadir" id="btRegistroMensaje" onclick="location.href='?controller=home&accion=addmessage'">
                </div>
 
-               <a data-scroll href="?controller=home&accion=index" id="logo">
-                  <img src="assets/images/pdf.svg" alt="Pasar a pdf">
-               </a>
-
                <?php if ($_SESSION['rol'] == 1) { ?>
                   <div class="form-group col-md-4">
                      <input type="submit" value="NUEVO CORREO" name="añadir" id="btRegistroCorreo" onclick="location.href='?controller=home&accion=addmail'">

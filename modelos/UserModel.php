@@ -41,9 +41,9 @@ class UserModel extends BaseModel
     /**
      * Función que comprueba si existe una fila en la tabla usuarios, con los valores introducidos
      * Sirve para comprobar si hemos introducido datos válidos en el logueo de la aplicación
-     * @param [string] $usuario Nombre de usuario introducido
-     * @param [string] $contrase Contraseña introducida
-     * @return void Devuelve el array con los parámetros
+     * @param string $usuario Nombre de usuario introducido
+     * @param string $contrase Contraseña introducida
+     * @return array $resultado Devuelve el array con la comprobación, errores y datos resultantes
      */
     public function loginCorrecto($usuario, $contraseña)
     {
@@ -88,8 +88,8 @@ class UserModel extends BaseModel
     /**
      * Función que comprueba si existe una fila en la tabla usuarios, con los valores introducidos
      * Sirve para comprobar si hemos introducido un correo válido en el envío de correos en la aplicacion
-     * @param [string] $correo Contraseña introducida
-     * @return type Devuelve el array con los parámetros
+     * @param string $correo Correo introducido al que enviar el mensaje
+     * @return array $resultado Devuelve el array con los parámetros
      */
     public function correoCorrecto($correo)
     {
@@ -120,9 +120,9 @@ class UserModel extends BaseModel
     }
 
     /**
-     *Método que realiza el proceso de registro y/o login de usuarios mediante cuentas de google
-     * @param [type] $datos Email y tipo de autentificación utilizada por el usuario
-     * @return void
+     *Funcion que realiza el proceso de registro y/o login de usuarios mediante cuentas de google
+     * @param array $datos Email y tipo de autentificación utilizada por el usuario
+     * @return array $resultado Array con un mensaje de resultado, así como los arrays de datos o errores en caso de haberse generados
      */
     public function logingoogle($datos)
     {
@@ -133,18 +133,19 @@ class UserModel extends BaseModel
             "mensaje" => '',
         ];
 
-        if (!empty($datos)) {
+        if (!empty($datos)) { //Si no hemos recibido datos por cualquier mótivo, no hacemos nada
 
-            $existe = "SELECT * from $this->table where autentificacion = :autentificacion and idgoogle = :idgoogle";
+            //Primero buscamos si existe un usuario ya existente con esta cuenta, para saber si crear un nuevo usuario o actualizar el ya existente
+            $existe = "SELECT * from $this->table where ((autentificacion=:autentificacion) and (idGoogle = :idgoogle))";
             $comprobar = $this->db->prepare($existe);
             $comprobar->execute(['autentificacion' => $datos['autentificacion'], 'idgoogle' => $datos['idgoogle']]);
 
-            if ($comprobar->rowCount() > 0) {
+            if ($comprobar->rowCount() > 0) { //Si existe un usuario con ese codigo de autentificación, actualizamos su correo (es lo único que puede cambiar)
 
                 try {
 
                     $this->db->beginTransaction();
-                    $actualizar = "UPDATE $this->table set email = :email where autentificacion = :autentificacion and idgoogle = :idgoogle";
+                    $actualizar = "UPDATE $this->table set email = :email where ((autentificacion=:autentificacion) and (idGoogle = :idgoogle))";
 
                     $actualizacion = $this->db->prepare($actualizar);
                     $actualizacion->execute(['autentificacion' => $datos['autentificacion'], 'idgoogle' => $datos['idgoogle'], 'email' => $datos['email']]);
@@ -158,18 +159,18 @@ class UserModel extends BaseModel
                     $this->db->rollback();
                     $resultado["mensaje"] = $ex->getMessage();
                 }
-            } else {
+            } else { //Si no existe ninguno así, creamos uno nuevo, indicando además el tipo de identificación y la id de google
 
                 try {
 
                     $this->db->beginTransaction();
                     //Definimos la instrucción SQL parametrizada
-                    $insertar = "INSERT INTO $this->table(nif, usu_nombre, apellido1, apellido2, login,  password, email, telefono, direccion, rol_id)
-                         VALUES (:nif, :nombre, :apellido1, :apellido2, :login, :password,:email , :telefono, :direccion, :rol_id, auntentificacion = :autentificacion, idgoogle = :idgoogle)";
+                    $insertar = "INSERT INTO $this->table(nif, usu_nombre, apellido1, apellido2, login,  password, email, telefono, direccion, rol_id, autentificacion, idGoogle)
+                         VALUES (:nif, :nombre, :apellido1, :apellido2, :login, :password,:email , :telefono, :direccion, :rol_id, :autentificacion,  :idgoogle)";
                     // Preparamos la consulta...
                     $insertando = $this->db->prepare($insertar);
                     // y la ejecutamos indicando los valores que tendría cada parámetro
-                    $insertando->execute([
+                    $insertando->execute([ //Introducimos valores vacíos, a excepción del nombre (MANOLO) y el login, password y email, que serán todos el correo de google
                         'nif' => 'N/A',
                         'nombre' => 'MANOLO',
                         'apellido1' => 'N/A',
@@ -196,17 +197,19 @@ class UserModel extends BaseModel
                 }
             }
 
-            if ($resultado["correcto"] == true) {
-                $datosUsuario = $this->db->query($comprobar);
-                $resultado['datos'] = $datosUsuario->fetch(PDO::FETCH_ASSOC);
+            if ($resultado["correcto"] == true) { //Si se ha realizado correctamente la operación, volvemos a seleccionar el usuario en cuestión, para devolver sus datos
+                $comprobar->execute(['autentificacion' => $datos['autentificacion'], 'idgoogle' => $datos['idgoogle']]);
+                $resultado['datos'] = $comprobar->fetch(PDO::FETCH_ASSOC);
             }
         }
+
+        return $resultado;
     }
 
     /**
      * Función que habilita o deshabilita un usuario, usada al pulsar el switch correspondiente en la tabla de usuarios
-     * @param [number] $int Id del usuario cuyo estado queremos cambiar
-     * @param [string] $cambio variable que especifica si queremos habilitarlo o deshabilitarlo
+     * @param number $id Id del usuario cuyo estado queremos cambiar
+     * @param string $cambio Variable que especifica si queremos habilitarlo o deshabilitarlo
      * @return array con el resultado y los posibles errores de la operación
      */
     public function cambiarEstado($id, $cambio)
@@ -248,7 +251,7 @@ class UserModel extends BaseModel
 
     /**
      * Función que realiza el listado de todos los usuarios registrados
-     * @return type Devuelve el array con los parámetros
+     * @return array $resultado Devuelve el array con los parámetros
      */
     public function listado()
     {
@@ -308,9 +311,9 @@ class UserModel extends BaseModel
         return $resultado;
     }
     /**
-     * Método que elimina el usuario cuyo id es el que se le pasa como parámetro
-     * @param $id es un valor numérico. Es el campo clave de la tabla
-     * @return boolean Array con el resultado, true o false, y con los errores en el último caso
+     * Funcion que elimina el usuario cuyo id es el que se le pasa como parámetro
+     * @param string $id es un valor numérico. Es el campo clave de la tabla
+     * @return array Array con el resultado, true o false, y con los errores en el último caso
      */
     public function deluser($id)
     {
@@ -347,9 +350,9 @@ class UserModel extends BaseModel
     }
 
     /**
-     *Método que añade un usuario a la base de datos, cuyos datos hemos introducido previamente por un formulario
-     * @param type $datos Datos del usuario a crear
-     * @return type Array con el resultado, true o false, y con los errores en el último caso
+     *Funcion que añade un usuario a la base de datos, cuyos datos hemos introducido previamente por un formulario
+     * @param array $datos Datos del usuario a crear
+     * @return array $resultado Array con el resultado, true o false, y con los errores en el último caso
      */
     public function adduser($datos)
     {
@@ -400,9 +403,9 @@ class UserModel extends BaseModel
     }
 
     /**
-     * Método que actualiza un elemento de la tabla usuario, con los datos que hayamos introducido previamente mediante formulario
-     * @param [type] $datos Nuevos datos del usuario
-     * @return void Array  con el resultado, true o false, así como los errores en el último caso
+     * Funcion que actualiza un elemento de la tabla usuario, con los datos que hayamos introducido previamente mediante formulario
+     * @param array $datos Nuevos datos del usuario
+     * @return array $resultado Array  con el resultado, true o false, así como los errores en el último caso
      */
     public function actuser($datos)
     {
@@ -451,9 +454,9 @@ class UserModel extends BaseModel
         return $resultado;
     }
     /**
-     * Método que devuelve los datos de un usuario
-     * @param [type] $id Id del usuario a mostrar
-     * @return void Array con el resultado, incluyendo además los datos del usuario en caso existoso
+     * Funcion que devuelve los datos de un usuario
+     * @param string $id Id del usuario a mostrar
+     * @return array $resultado Array con el resultado, incluyendo además los datos del usuario en caso existoso
      */
     public function listausuario($id)
     {
@@ -482,9 +485,9 @@ class UserModel extends BaseModel
     }
 
     /**
-     * Método que sanea los valores introducidos en los formularios
-     * @param [type] $valores Datos introducidos sin sanear
-     * @return [array] $valores Datos saneados, elimiando carácteres especiales
+     * Funcion que sanea los valores introducidos en los formularios
+     * @param array $valores Datos introducidos sin sanear
+     * @return array $valores Datos saneados, elimiando carácteres especiales
      */
     public function sanearValores($valores)
     {
@@ -496,10 +499,10 @@ class UserModel extends BaseModel
     }
 
     /**
-     * Método que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
+     * Funcion que me comprueba si los valores introducidos en los campos de un usuario, para el registro de uno nuevo o la actualización de uno existente,
      *  cumple con las restricciones establecidas de formato para estas
-     * @param [type] $datos Array con los datos establecidos
-     * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
+     * @param array $datos Array con los datos establecidos
+     * @return array $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
     public function comprobarRestricciones($datos)
     {
@@ -546,10 +549,10 @@ class UserModel extends BaseModel
     }
 
     /**
-     * Método que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
-     * @param [type] $datosUsu datos del usuario a introducir
-     * @param [type] $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
-     * @return void Array con el resultado de la consulta y un error, en caso de que se provocase
+     * Funcion que comprueba si existe un usuario con determinados datos de los introducidos, que se utiliza para evitar que se repitan usuarios
+     * @param array $datosUsu datos del usuario a introducir
+     * @param string $modo Variable que nos permite diferenciar entre un nuevo usuario o uno ya existente (pues la consulta es distinta)
+     * @return array $resultado Array con el resultado de la consulta y un error, en caso de que se provocase
      */
     public function comprobarRepeticion($datosUsu, $modo)
     {

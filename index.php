@@ -11,7 +11,7 @@ spl_autoload_register(function ($nombre) {
 });
 
 try {
-   //Lo iniciamos con su método estático main.
+   //Lo iniciamos con su Funcion estático main.
    FrontController::main();
 } catch (\Exception $e) {
    echo $e->getMessage();

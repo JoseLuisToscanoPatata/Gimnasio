@@ -13,7 +13,7 @@ abstract class BaseModel
 
     /**
      * Base de datos a utilizar
-     * @var [db]
+     * @var db
      */
     protected $db;
 
@@ -26,8 +26,8 @@ abstract class BaseModel
     }
 
     /**
-     * Método genérico para obtener todos los registros de la tabla $table
-     * @return void
+     * Funcion genérico para obtener todos los registros de la tabla $table
+     * @return array $resultSet Todas las líneas de la tabla
      */
     public function getAll()
     {
@@ -44,9 +44,9 @@ abstract class BaseModel
     }
 
     /**
-     * Método genérico que obtiene una fila de una tabla, según el identificador que indiquemos (no sirve, pues las id no se llaman así)
-     * @param [type] $id identificador de la fila a obtener
-     * @return void
+     * Funcion genérico que obtiene una fila de una tabla, según el identificador que indiquemos (no sirve, pues las id no se llaman así)
+     * @param integer $id identificador de la fila a obtener
+     * @return array $resultSet Fila obtenida de la tabla
      */
     public function getById($id)
     {
@@ -62,10 +62,10 @@ abstract class BaseModel
     }
 
     /**
-     * Método que nos permite buscar un elemento de una tabla, pero buscando por todas las columnas
-     * @param [type] $column Columna en la que buscar
-     * @param [type] $value Valor que buscar
-     * @return void
+     * Funcion que nos permite buscar un elemento de una tabla, pero buscando por todas las columnas
+     * @param integer $column Columna en la que buscar
+     * @param  String $value Valor que buscar
+     * @return array $resultSet Fila obtenida de la tabla
      */
     public function getBy($column, $value)
     {
@@ -81,9 +81,9 @@ abstract class BaseModel
     }
 
     /**
-     * Metodo que borra una fila de la tabla, en función del identificador que indiquemos
-     * @param [type] $id identificador de la fila a eliminar
-     * @return void
+     * Funcion que borra una fila de la tabla, en función del identificador que indiquemos
+     * @param  $id identificador de la fila a eliminar
+     * @return void No devuelve nada, pues simplemente borra la fila
      */
     public function deleteById($id)
     {
@@ -93,10 +93,10 @@ abstract class BaseModel
     }
 
     /**
-     * Método que borra una fila de la tabla, pero buscando por todas las columnas
-     * @param [type] $column Columna en la que queremos buscar el dato de la fila a eliminar
-     * @param [type] $value Valor que contiene la fila a eliminar
-     * @return void
+     * Funcion que borra una fila de la tabla, pero buscando por todas las columnas
+     * @param integer $column Columna en la que queremos buscar el dato de la fila a eliminar
+     * @param String $value Valor que contiene la fila a eliminar
+     * @return void No devuelve nada, pues simplemente borra la fila
      */
     public function deleteBy($column, $value)
     {
@@ -104,11 +104,11 @@ abstract class BaseModel
         return $query;
     }
     /**
-     * Metodo que añade una acción al log de acciones de los usuarios de la bd
-     * @param [type] $user_id identificador del usuario
-     * @param [type] $action Acción realizada
-     * @param [type] $description Descripción de la acción
-     * @return void
+     * Funcion que añade una acción al log de acciones de los usuarios de la bd
+     * @param integer $user_id identificador del usuario
+     * @param String $action Acción realizada
+     * @param String $description Descripción de la acción
+     * @return void No devuelve nada, pues simplemente añade un nuevo evento al Log
      */
     public function setLog($user_id, $action, $description)
     {

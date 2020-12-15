@@ -3,7 +3,7 @@
 
 new WOW().init();
 
-/**Método que oculta y muestra el botón para subir a la cabecera, según su posición. */
+/**Funcion que oculta y muestra el botón para subir a la cabecera, según su posición. */
 $(function () {
     $(window).scroll(function () {
         var scrolltop = $(this).scrollTop();
@@ -16,7 +16,7 @@ $(function () {
 
 });
 
-/**Metodo que anima la cabecera cuando estemos a más de 80 pixeles por debajo del máximo, aplicándole una nueva clase (que editaremos) a la dicha*/
+/**Funcion que anima la cabecera cuando estemos a más de 80 pixeles por debajo del máximo, aplicándole una nueva clase (que editaremos) a la dicha*/
 $(window).scroll(function () {
 
     var nav = $('.encabezado');

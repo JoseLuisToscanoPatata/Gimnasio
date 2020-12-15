@@ -26,7 +26,7 @@
                      <div class="col-xs-4">
                         <input type="text" name="usuario" class="form-control" id="usuario" value="<?php if (isset($_COOKIE['usuario'])) {
                                                                                                       echo $_COOKIE['usuario'];
-                                                                                                   } ?>" maxlength="20" required />
+                                                                                                   } ?>" maxlength="30" required />
                      </div>
                   </div>
 
@@ -35,7 +35,7 @@
                      <div class="col-xs-4">
                         <input type="password" name="password" class="form-control" id="contraseña" value="<?php if (isset($_COOKIE['password'])) {
                                                                                                                echo $_COOKIE['password'];
-                                                                                                            } ?>" maxlength="20" required />
+                                                                                                            } ?>" maxlength="30" required />
                      </div>
                   </div>
 

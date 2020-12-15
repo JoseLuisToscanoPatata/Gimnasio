@@ -7,12 +7,12 @@ abstract class BaseController
 {
    /**
     * Vista protegida, que utilizaremos en el controlador en uso para guardar y mostrar una vista
-    * @var [view] Vista a mostrar
+    * @var view Vista a mostrar
     */
    protected $view;
 
    /**
-    * Metodo constructor, que incializa la propiedad vista
+    * Funcion constructor, que incializa la propiedad vista
     */
    function __construct()
    {

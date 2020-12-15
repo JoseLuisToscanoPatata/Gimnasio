@@ -1,11 +1,12 @@
-<?php
 
-/**
- * Definimos los parametros con los que conectarnos a la base de datos
- */
+   <?php
 
-define('DBDRIVER', 'mysql');
-define('DBHOST', 'localhost');
-define('DBNAME', 'bdusuarios');
-define('DBUSER', 'paco');
-define('DBPASS', 'patata');
+   /**
+    * Definimos los parametros con los que conectarnos a la base de datos
+    */
+
+   define('DBDRIVER', 'mysql'); //Programa de base de datos
+   define('DBHOST', 'localhost'); //Equipo donde nos conectamos
+   define('DBNAME', 'bdusuarios'); //Base de datos a utilizar
+   define('DBUSER', 'paco'); //Usuario
+   define('DBPASS', 'patata'); //Contraseña

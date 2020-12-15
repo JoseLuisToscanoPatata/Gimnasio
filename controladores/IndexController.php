@@ -16,14 +16,14 @@ class IndexController extends BaseController
     /**
      * Clase modelo (en ete caso UserModel) que utilizaremos para acceder a los datos y operaciones de la 
      * base de datos desde el controlador
-     * @var [view] Objeto de tipo UserModel
+     * @var UserModel Objeto de tipo UserModel
      */
     private $modelo;
 
     /**
      * $mensajes se utiliza para almacenar los mensajes generados en las tareas,
      * que serán posteriormente transmitidos a la vista para su visualización
-     * @var [array] Array de mensajes
+     * @var array Array de mensajes
      */
     private $mensajes = [];
 
@@ -39,7 +39,7 @@ class IndexController extends BaseController
     }
 
     /**
-     * Metodo que nos lleva a la página principal de la aplicación
+     * Funcion que nos lleva a la página principal de la aplicación
      * @return void  No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function index()
@@ -79,7 +79,7 @@ class IndexController extends BaseController
     }
 
     /**
-     * Método que se encargará del login de los usuarios en nuestra página
+     * Funcion que se encargará del login de los usuarios en nuestra página
      * @return void  No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function login()
@@ -203,40 +203,33 @@ class IndexController extends BaseController
     }
 
     /**
-     * Metodo que lleva a cabo el proceso del logueo a nuestra página mediante cuentas de google
+     * Funcion que lleva a cabo el proceso del logueo a nuestra página mediante cuentas de google
      * @return void
      */
     public function loginGoogle()
     {
-        include_once 'gpConfig.php';
+        include_once 'gpConfig.php'; //Incluimos el fichero con la configuración de google auth
 
-        if (isset($_GET['conexion'])) {
-            $gClient->authenticate($_GET['conexion']);
-            $_SESSION['token'] = $gClient->getAccessToken();
+        if (isset($_SESSION['token'])) {  //Si hemos recibido la sesión con el token con nuestra información..
+            $gClient->setAccessToken($_SESSION['token']); //La guardamos en el objeto google_client creado
         }
 
-        if (isset($_SESSION['token'])) {
-            $gClient->setAccessToken($_SESSION['token']);
-        }
+        if ($gClient->getAccessToken()) { //Si podemos obtener el token del objeto creado..
 
-        if ($gClient->getAccessToken()) {
-            //Get user profile data from google
-            $gpUserProfile = $google_oauthV2->userinfo->get();
+            $gpUserProfile = $google_oauthV2->userinfo->get(); //Obtenemos nuestros datos de usuario
 
-            //Insert or update user data to the database
-            $datosUsuGoogle = array(
-                'autentificacion' => 'google',
-                'idgoogle' => $gpUserProfile['id'],
-                'email' => $gpUserProfile['email'],
+            $datosUsuGoogle = array( //Metemos ciertos datos de esos en un array para trabajar con ellos
+                'autentificacion' => 'google', //Variable que indica el tipo de autentificación (google, facebook, etc.)
+                'idgoogle' => $gpUserProfile['id'], //id de usuario de google
+                'email' => $gpUserProfile['email'], //email de la cuenta de google
             );
 
-            $datosUsuWeb = $this->modelo->loginGoogle($datosUsuGoogle);
+            $datosUsuWeb = $this->modelo->loginGoogle($datosUsuGoogle); //Realizamos el logueo
 
-            $_SESSION['logueado'] = $datosUsuWeb['usu_nombre'];
-            $_SESSION['rol'] = $datosUsuWeb['rol_id'];
-            $_SESSION['id'] = $datosUsuWeb['usuario_id'];
+            $_SESSION['logueado'] = $datosUsuWeb['datos']['usu_nombre']; //Establecemos las sesiones necesarias
+            $_SESSION['rol'] = $datosUsuWeb['datos']['rol_id'];
+            $_SESSION['id'] = $datosUsuWeb['datos']['usuario_id'];
             $_SESSION['hora'] = date("H:i:s");
-            $_SESSION['google'] = '1';
 
             if ($datosUsuWeb['correcto']) {
                 $parametros["tituloventana"] = "Pagina de inicio";
@@ -249,7 +242,7 @@ class IndexController extends BaseController
                 $this->view->show("Inicio", $parametros); //Si  hemos introducido los datos correctos, mostramos la ventana de inicio del usuario
 
 
-            } else {
+            } else { //Si ha habido algún fallo en el registro, o en el acceso a google, nos devuelve a la ventana de login, con los mensajes de error
                 $parametros["tituloventana"] = "Pagina de login";
 
                 $this->mensajes[] = [
@@ -270,7 +263,7 @@ class IndexController extends BaseController
     }
 
     /**
-     * Método que se encargará del registro de los usuarios en nuestra página
+     * Funcion que se encargará del registro de los usuarios en nuestra página
      * @return void  No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function register()
@@ -340,7 +333,7 @@ class IndexController extends BaseController
             }
             // Si no se han producido errores realizamos el registro del usuario
             if (count($errores) == 0) {
-                $resultModelo = $this->modelo->adduser([ //LLamamos al método para añadir el usuario, con los datos ya saneados
+                $resultModelo = $this->modelo->adduser([ //LLamamos al Funcion para añadir el usuario, con los datos ya saneados
                     'nif' => $datosSaneados['nif'],
                     'nombre' => $datosSaneados['nombre'],
                     'apellido1' => $datosSaneados['apellido1'],

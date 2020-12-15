@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Incluimos los modelos que necesite este controlador, en este caso, Activity controler
+ * Incluimos los modelos que necesite este controlador, en este caso, UserModel y MessageModel, así como las librerias de phpmailer para los correos
  */
 
 require 'vendor/phpmailer/phpmailer/src/Exception.php';
@@ -15,21 +15,21 @@ use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
 /**
- * Clase controlador de la página de inicio,  al portal desde la que se realizarán funcones varias,
- * como el trato de los mensajes entre usuarios, o la redirección a la página de inicio del usuario
+ * Clase controlador de la página de inicio, al portal desde la que se realizarán funcones varias,
+ * como el trato de los mensajes entre usuarios, la redirección a la página de inicio del usuario o el envío de correos
  */
 class HomeController extends BaseController
 {
     /**
      * Clase modelo 1 (UserModel) que utilizaremos para acceder a los datos de usuarios
-     * @var [view] Objeto de tipo UserModel
+     * @var UserModel Objeto de tipo UserModel
      */
     private $modeloUser;
 
     /**
      * Clase modelo 2 (MessageModel) que utilizaremos para acceder a los mensajes de los usuarios, así
      * como poder trabajar con ellos desde el controlador
-     * @var [view] Objeto de tipo UserModel
+     * @var MessageModel Objeto de tipo UserModel
      */
     private $modeloMens;
 
@@ -46,7 +46,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Metodo que me lleva a la página de inicio de un usuario
+     * Funcion que me lleva a la página de inicio de un usuario
      * @return void No devuelve nada, pues simplemente muestra la lista, pasándole los parámetros
      */
     public function index()
@@ -64,7 +64,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Método que obtiene de la base de datos el listado de mensajes y envía dicha
+     * Funcion que obtiene de la base de datos el listado de mensajes y envía dicha
      * infomación a la vista correspondiente para su visualización
      */
     public function listado()
@@ -106,7 +106,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Metodo que elimina un mensaje seleccionado de la tabla de mensaje, proveniendo su id
+     * Funcion que elimina un mensaje seleccionado de la tabla de mensaje, proveniendo su id
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function delmessage()
@@ -141,7 +141,7 @@ class HomeController extends BaseController
         $this->listado();
     }
     /**
-     * Metodo que añade un mensaje nuevo, cuyas propiedades indicamos por formulario
+     * Funcion que añade un mensaje nuevo, cuyas propiedades indicamos por formulario
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function addmessage()
@@ -213,7 +213,7 @@ class HomeController extends BaseController
     }
 
     /**
-     * Método que permite nos permite actualizar los datos de un mensaje elegido, cuya id coincide con la que
+     * Funcion que permite nos permite actualizar los datos de un mensaje elegido, cuya id coincide con la que
      * se pasa como parámetro desde la vista del listado, a través de GET
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */

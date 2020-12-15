@@ -105,9 +105,12 @@ CREATE OR REPLACE TABLE tramo_usuario (
    PRIMARY KEY(mensaje_id),
    FOREIGN KEY(usu_origen) REFERENCES usuario(usuario_id),
    FOREIGN KEY(usu_destino) REFERENCES usuario(usuario_id)
- )
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
- INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 1, 2, '!Bienvenido a nuestro gimnasio!', 'Bienvenido!');
+  INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 1, 2, '!Bienvenido a nuestro gimnasio!', 'Bienvenido!');
+  INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 2, 1, '!Me encantan!', 'Ostia pilotes!');
+  INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 3, 1, '!Viva españita!', 'españita!');
+  INSERT INTO mensaje (mensaje_id, usu_origen, usu_destino, mensaje, asunto) VALUES (NULL, 1, 3, '!Yo me llamo ralph!', 'Unicornio retrasado!');
 
 COMMIT;
 

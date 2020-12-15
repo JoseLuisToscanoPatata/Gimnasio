@@ -16,14 +16,14 @@ class ActivityController extends BaseController
     /**
      * Clase modelo (en ete caso ActivityModel) que utilizaremos para acceder a los datos y operaciones de la 
      * base de datos desde el controlador
-     * @var [view] Objeto de tipo ActivityModel
+     * @var ActivityModel Objeto de tipo ActivityModel
      */
     private $modelo;
 
     /**
      * $mensajes se utiliza para almacenar los mensajes generados en las tareas,
      * que serán posteriormente transmitidos a la vista para su visualización
-     * @var [array] Array de mensajes
+     * @var array Array de mensajes
      */
     private $mensajes;
 
@@ -39,7 +39,7 @@ class ActivityController extends BaseController
     }
 
     /**
-     * Método que obtiene de la base de datos el listado de actividades y envía dicha
+     * Funcion que obtiene de la base de datos el listado de actividades y envía dicha
      * infomación a la vista correspondiente para su visualización
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
@@ -79,7 +79,7 @@ class ActivityController extends BaseController
     }
 
     /**
-     * Metodo que elimina una actividad seleccionada de la tabla de actividades, proveniendo su id
+     * Funcion que elimina una actividad seleccionada de la tabla de actividades, proveniendo su id
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function delactivity()
@@ -116,7 +116,7 @@ class ActivityController extends BaseController
     }
 
     /**
-     * Metodo que añade una actividad nueva, cuyas propiedades indicamos por formulario
+     * Funcion que añade una actividad nueva, cuyas propiedades indicamos por formulario
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros
      */
     public function addactivity()
@@ -145,7 +145,7 @@ class ActivityController extends BaseController
 
             // Si no se han producido errores realizamos el registro de la actividad
             if (count($errores) == 0) {
-                $resultModelo = $this->modelo->addactivity([ //Llamamos al método del modelo para añadir la actividad, usando los datos saneados
+                $resultModelo = $this->modelo->addactivity([ //Llamamos al Funcion del modelo para añadir la actividad, usando los datos saneados
                     'aforo' => $datosSaneados['aforo'],
                     'nombre' => $datosSaneados['nombre'],
                     'descripcion' => $datosSaneados['descripcion'],
@@ -156,7 +156,7 @@ class ActivityController extends BaseController
                         "mensaje" => "La actividad se añadió correctamente!! :)",
                     ];
                 else :
-                    $this->mensajes[] = [ //Si ha habido algún error en el método del modelo..
+                    $this->mensajes[] = [ //Si ha habido algún error en el Funcion del modelo..
                         "tipo" => "danger",
                         "mensaje" => "La actividad no pudo añadirse!! :( <br />({$resultModelo["error"]})",
                     ];
@@ -187,7 +187,7 @@ class ActivityController extends BaseController
     }
 
     /**
-     * Método que permite nos permite actualizar los datos de una actividad elegida, cuya id coincide con la que
+     * Funcion que permite nos permite actualizar los datos de una actividad elegida, cuya id coincide con la que
      * se pasa como parámetro desde la vista del listado, a través de GET
      *
      * @return void No devuelve nada, pues simplemente devuelve la lista, pasándole los parámetros

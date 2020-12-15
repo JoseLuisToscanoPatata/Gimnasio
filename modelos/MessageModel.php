@@ -42,7 +42,7 @@ class MessageModel extends BaseModel
 
     /**
      * Función que realiza el listado de todos los usuarios registrados
-     * @return type Devuelve el array con los parámetros
+     * @return array $resultado Array con los con los errores, datos, comprobación y paginación
      */
     public function listado($modo)
     {
@@ -122,9 +122,9 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que elimina el mensaje cuyo id es el que se le pasa como parámetro
-     * @param $id es un valor numérico. Es el campo clave de la tabla
-     * @return boolean Array con el resultado, true o false, y con los errores en el último caso
+     * Funcion que elimina el mensaje cuyo id es el que se le pasa como parámetro
+     * @param int $id es un valor numérico. Es el campo clave de la tabla
+     * @return array $resultado Array con el resultado, true o false, y con los errores en el último caso
      */
     public function delmessage($id)
     {
@@ -161,9 +161,9 @@ class MessageModel extends BaseModel
     }
 
     /**
-     *Método que añade un usuario a la base de datos, cuyos datos hemos introducido previamente por un formulario
-     * @param type $datos Datos del usuario a crear
-     * @return type Array con el resultado, true o false, y con los errores en el último caso
+     *Funcion que añade un usuario a la base de datos, cuyos datos hemos introducido previamente por un formulario
+     * @param array $datos Datos del usuario a crear
+     * @return array $resultado Array con el resultado, true o false, y con los errores en el último caso
      */
     public function addmessage($datos)
     {
@@ -210,9 +210,10 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que devuelve los datos de un mensaje
-     * @param [type] $id Id del mensaje a mostrar
-     * @return void Array con el resultado, incluyendo además los datos del mensaje en caso existoso
+     * Funcion que devuelve los datos de un mensaje
+     * @param int $id Id del mensaje a mostrar
+     * @param string $modo Cadena que define el modo de listar los mensajes (si bandeja de entrada o de salida)
+     * @return array $resultado Array con el resultado, incluyendo además los datos del mensaje en caso existoso
      */
     public function listamensaje($id, $modo)
     {
@@ -249,10 +250,10 @@ class MessageModel extends BaseModel
     }
 
     /**
-     * Método que me comprueba si los valores introducidos en los campos de un mensaje
+     * Funcion que me comprueba si los valores introducidos en los campos de un mensaje
      *  no están vacíos o únicamente llenos de espacios
-     * @param [type] $datos Array con los datos establecidos
-     * @return $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
+     * @param array $datos Array con los datos establecidos
+     * @return array $errores Posibles errores generados, devueltos para enseñarlos en caso de que existan
      */
     public function comprobarRestricciones($datos, $modo)
     {
@@ -280,8 +281,8 @@ class MessageModel extends BaseModel
     /**
      * Función que comprueba si vamos a enviar un mensaje a un destinatario existente
      *En función del nombre de usuario de destinatario que hemos introducido
-     * @param [type] $destino
-     * @return void Devuelve un array con un booleano para comprobar si existe, así como un error en caso de que falle la consulta
+     * @param string $destino Nombre de usuario del destinatario del mensaje
+     * @return array $resultado Devuelve un array con un booleano para comprobar si existe, así como un error en caso de que falle la consulta
      */
     public function comprobarDestinatario($destino)
     {

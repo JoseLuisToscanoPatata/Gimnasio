@@ -1,4 +1,5 @@
 <?php
+
 /**
  * El FrontController es el que recibe todas las peticiones, incluye algunos ficheros, busca el controlador y llama a la acción que corresponde.
  * Con el objetivo de no repetir nombre de clases nuestros controladores terminarán todos en Controller.
@@ -36,7 +37,7 @@ class FrontController
       }
       require $controller_path;
 
-      //Si no existe la clase que buscamos y su método mostramos un error
+      //Si no existe la clase que buscamos y su Funcion mostramos un error
       if (!is_callable(array($controller, $action))) {
          $controller = DEFAULT_CONTROLLER;
          $action = DEFAULT_ACTION;
